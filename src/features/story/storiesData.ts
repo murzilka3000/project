@@ -303,14 +303,36 @@ export const storiesData: Story[] = [
       },
     ],
   },
-
   {
     id: 8,
     title: "",
-    backgroundImage: "/images/story8/background-8.jpg",
-
-    audioTrack: "/audio/while.mp3",
+    backgroundImage: "/bg.png",
     description: "The End",
-    objects: [],
+    objects: [
+      {
+        id: "book",
+        // --- ВОТ ЭТИ ПОЛЯ БЫЛИ ПРОПУЩЕНЫ ---
+        gifUrl: "/link.svg",
+        position: { x: 0.5, y: 0.5 },
+        size: { width: 1.3, height: 0.6 },
+        // -----------------------------------
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/link.svg", // или другая картинка для эффекта нажатия
+              duration: 1500,
+            },
+          },
+          {
+            type: "link",
+            data: {
+              url: "https://bfan.link/places-we-ll-go", // Ваша ссылка
+              target: "_blank",
+            },
+          },
+        ],
+      },
+    ],
   },
 ]

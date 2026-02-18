@@ -17,13 +17,14 @@ export interface InteractiveObject {
     width: number
     height: number
   }
+  // Добавил | "link" в оба места (для одиночного объекта и для массива)
   interaction?:
     | {
-        type: "sound" | "navigate" | "replace"
+        type: "sound" | "navigate" | "replace" | "link"
         data: any
       }
     | Array<{
-        type: "sound" | "navigate" | "replace"
+        type: "sound" | "navigate" | "replace" | "link"
         data: any
       }>
   zIndex?: number
@@ -34,7 +35,7 @@ export interface Story {
   id: number
   title: string
   backgroundImage: string
-  audioTrack: string
+  audioTrack?: string
   objects: InteractiveObject[]
   description?: string
   baseLayer?: string
@@ -43,6 +44,7 @@ export interface Story {
   backgroundSequence?: string[]
   sequenceInterval?: number
 }
+
 export interface StoryState {
   stories: Story[]
   currentStoryIndex: number

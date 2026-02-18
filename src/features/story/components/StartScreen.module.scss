@@ -1,17 +1,14 @@
 @use "@/styles/mixins" as *;
 
-// Подключаем пиксельный шрифт (если еще не подключен глобально)
-@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
-
 .startScreen {
   position: fixed;
   top: 0%;
   transform: translateX(-50%);
   left: 50%;
-  width: 100vw;
+  // width: 100vw;
   height: 100dvh;
-  max-width: 513px;
- 
+  aspect-ratio: 1632 / 2912;
+
   // Убедитесь, что путь к картинке фона правильный
   background-image: url("/bg.png");
   background-size: cover;
@@ -20,7 +17,6 @@
   align-items: center; // Центрирование по вертикали
   justify-content: center; // Центрирование по горизонтали
   z-index: 9999;
-  font-family: "Press Start 2P", cursive;
 
   .overlay {
     position: absolute;
@@ -42,9 +38,8 @@
 
     // Заголовок
     .title {
-      font-size: 18px;
-      line-height: 1.5;
-      margin: 0 0 25px 0; // Отступ до загрузчика/кнопки
+      font-size: 22px;
+      margin: 0 0 15px 0; // Отступ до загрузчика/кнопки
       color: white;
       text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.6);
       text-align: center;
@@ -73,7 +68,7 @@
       }
 
       .loadingText {
-        font-size: 14px;
+        font-size: 18px;
         color: white;
         text-shadow: 2px 2px 0px black;
         opacity: 0.8;
@@ -88,8 +83,11 @@
       border: none;
       outline: none;
       cursor: pointer;
-
+      padding: 0 !important;
       animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      img {
+        width: 210px;
+      }
     }
   }
 }
@@ -116,24 +114,8 @@
   }
 }
 
-// Адаптив
-@media (max-width: 768px) {
-  .startScreen {
-    .content {
-      .title {
-        font-size: 20px;
-        max-width: 90%;
-        margin-bottom: 40px;
-      }
 
-      .startButton {
-        padding: 15px 30px;
-        font-size: 14px;
-      }
 
-      .loadingState .loaderContainer {
-        transform: scale(0.8);
-      }
-    }
-  }
+.loaderContainer {
+  max-width: 210px;
 }

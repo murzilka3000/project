@@ -51,6 +51,17 @@ export const InteractiveObject: React.FC<Props> = ({ object }) => {
         }
         break
 
+      // --- ДОБАВЛЕНО: Обработка ссылки ---
+      case "link":
+        if (interaction.data?.url) {
+          // Открываем ссылку.
+          // target="_blank" открывает в новой вкладке (по умолчанию)
+          // target="_self" откроет в той же вкладке
+          window.open(interaction.data.url, interaction.data.target || "_blank")
+        }
+        break
+      // -----------------------------------
+
       case "navigate":
         // TODO: реализовать навигацию
         console.log("Navigate:", interaction.data)
@@ -63,9 +74,11 @@ export const InteractiveObject: React.FC<Props> = ({ object }) => {
 
     if (!object.interaction) return
 
+    // Если interaction — это массив, перебираем все действия
     if (Array.isArray(object.interaction)) {
       object.interaction.forEach((int) => handleInteraction(int))
     } else {
+      // Если это одиночный объект (на случай старого формата данных)
       handleInteraction(object.interaction)
     }
   }
@@ -83,6 +96,7 @@ export const InteractiveObject: React.FC<Props> = ({ object }) => {
         width: `${size.width * 100}%`,
         height: `${size.height * 100}%`,
         zIndex: object.zIndex || 1,
+        cursor: "pointer", // Убедимся, что курсор выглядит как рука
       }}
       onClick={handleClick}
     >
