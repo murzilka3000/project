@@ -8,8 +8,6 @@
   // width: 100vw;
   height: 100dvh;
   aspect-ratio: 1632 / 2912;
-
-  // Убедитесь, что путь к картинке фона правильный
   background-image: url("/bg.png");
   background-size: cover;
   background-position: center;
@@ -17,7 +15,9 @@
   align-items: center; // Центрирование по вертикали
   justify-content: center; // Центрирование по горизонтали
   z-index: 9999;
-
+  @media screen and (max-width: 500px) {
+    width: 100%;
+  }
   .overlay {
     position: absolute;
     top: 0;
@@ -113,8 +113,6 @@
     transform: scale(1);
   }
 }
-
-
 
 .loaderContainer {
   max-width: 210px;
