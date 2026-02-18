@@ -2,57 +2,6 @@ import { Story } from "./types"
 
 export const storiesData: Story[] = [
   {
-    id: 7,
-    title: "",
-    backgroundImage: "/images/story7/bg1.jpg",
-    audioTrack: "/audio/while.mp3",
-    backgroundSequence: ["/images/story7/bg1.jpg", "/images/story7/bg2.jpg", "/images/story7/bg3.jpg", "/images/story7/bg4.jpg"],
-    objects: [
-      {
-        id: "tree",
-        gifUrl: "/images/story7/leaves-1.png",
-        position: { x: 0.5, y: 0.15 },
-        size: { width: 1, height: 0.5 },
-        interaction: [
-          {
-            type: "replace",
-            data: {
-              replacementGif: "/images/story7/leaves.gif",
-              duration: 1500,
-            },
-          },
-          {
-            type: "sound",
-            data: {
-              soundUrl: "/audio/effects/leaves-sound.mp3",
-            },
-          },
-        ],
-      },
-      {
-        id: "star",
-        gifUrl: "/images/story7/transparent.png",
-        position: { x: 0.4, y: 0.35 },
-        size: { width: 0.5, height: 0.5 },
-        interaction: [
-          {
-            type: "replace",
-            data: {
-              replacementGif: "/images/story7/star.gif",
-              duration: 1500,
-            },
-          },
-          // {
-          //   type: "sound",
-          //   data: {
-          //     soundUrl: "/audio/effects/leaves-sound.mp3",
-          //   },
-          // },
-        ],
-      },
-    ],
-  },
-  {
     id: 1,
     title: "Akiaura Story Ch. 1",
     backgroundImage: "/images/story1/background.png",
@@ -302,6 +251,57 @@ export const storiesData: Story[] = [
     backgroundImage: "/images/story6/background-6.jpg",
     audioTrack: "/audio/background-6.mp3",
     objects: [],
+  },
+  {
+    id: 7,
+    title: "",
+    backgroundImage: "/images/story7/bg1.jpg",
+    audioTrack: "/audio/while.mp3",
+    backgroundSequence: ["/images/story7/bg1.jpg", "/images/story7/bg2.jpg", "/images/story7/bg3.jpg", "/images/story7/bg4.jpg"],
+    objects: [
+      {
+        id: "tree",
+        gifUrl: "/images/story7/leaves-1.png",
+        position: { x: 0.5, y: 0.15 },
+        size: { width: 1, height: 0.5 },
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/story7/leaves.gif",
+              duration: 1500,
+            },
+          },
+          {
+            type: "sound",
+            data: {
+              soundUrl: "/audio/effects/leaves-sound.mp3",
+            },
+          },
+        ],
+      },
+      {
+        id: "star",
+        gifUrl: "/images/story7/transparent.png",
+        position: { x: 0.4, y: 0.35 },
+        size: { width: 0.5, height: 0.5 },
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/story7/star.gif",
+              duration: 1500,
+            },
+          },
+          // {
+          //   type: "sound",
+          //   data: {
+          //     soundUrl: "/audio/effects/leaves-sound.mp3",
+          //   },
+          // },
+        ],
+      },
+    ],
   },
 
   {
