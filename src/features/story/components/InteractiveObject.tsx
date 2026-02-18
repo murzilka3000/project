@@ -1,9 +1,23 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { RootState } from "@/app/store"
 import { InteractiveObject as IInteractiveObject } from "../types"
 import { markObjectInteraction } from "../storySlice"
 import styles from "./InteractiveObject.module.scss"
+
+// Описываем интерфейс данных, чтобы избежать 'any'
+interface InteractionData {
+  soundUrl?: string
+  replacementGif?: string
+  duration?: number
+  url?: string
+  target?: string
+}
+
+interface Interaction {
+  type: string
+  data: InteractionData
+}
 
 interface Props {
   object: IInteractiveObject
@@ -15,61 +29,97 @@ export const InteractiveObject: React.FC<Props> = ({ object }) => {
   const [currentGif, setCurrentGif] = useState(object.gifUrl)
   const [isMobile, setIsMobile] = useState(false)
 
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // 1. Определение мобильного устройства
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 768px)")
     setIsMobile(mediaQuery.matches)
     const handleChange = (e: MediaQueryListEvent) => setIsMobile(e.matches)
     mediaQuery.addEventListener("change", handleChange)
-    return () => mediaQuery.removeEventListener("change", handleChange)
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleChange)
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
   }, [])
 
+  // 2. Предзагрузка ресурсов (Preloading)
   useEffect(() => {
     setCurrentGif(object.gifUrl)
-  }, [object.gifUrl])
 
-  const handleInteraction = (interaction: { type: string; data: any }) => {
+    if (object.interaction) {
+      const interactions = Array.isArray(object.interaction) ? object.interaction : [object.interaction]
+
+      interactions.forEach((int) => {
+        if (int.type === "replace" && int.data.replacementGif) {
+          const img = new Image()
+          img.src = int.data.replacementGif
+        }
+        if (int.type === "sound" && int.data.soundUrl) {
+          const audioPreload = new Audio(int.data.soundUrl)
+          audioPreload.preload = "auto"
+        }
+      })
+    }
+  }, [object.gifUrl, object.interaction])
+
+  const handleInteraction = (interaction: Interaction) => {
     switch (interaction.type) {
-      case "sound":
-        if (isAudioPlaying) {
-          const audio = new Audio(interaction.data.soundUrl)
-          audio.play().catch((e) => console.error("Ошибка:", e))
+      case "sound": {
+        if (isAudioPlaying && interaction.data.soundUrl) {
+          // Вызываем play() сразу, не присваивая переменной, чтобы избежать ошибки unused-vars
+          void new Audio(interaction.data.soundUrl).play().catch((e) => console.error("Ошибка звука:", e))
         }
         break
-      case "replace":
+      }
+
+      case "replace": {
         const { replacementGif, duration = 2000 } = interaction.data
         if (replacementGif) {
           setCurrentGif(replacementGif)
-          setTimeout(() => setCurrentGif(object.gifUrl), duration)
+
+          if (timeoutRef.current) clearTimeout(timeoutRef.current)
+
+          timeoutRef.current = setTimeout(() => {
+            setCurrentGif(object.gifUrl)
+          }, duration)
         }
         break
-      case "link":
-        if (interaction.data?.url) {
+      }
+
+      case "link": {
+        if (interaction.data.url) {
           window.open(interaction.data.url, interaction.data.target || "_blank")
         }
         break
-      case "navigate":
-        console.log("Navigate:", interaction.data)
+      }
+
+      case "navigate": {
+        console.log("Navigate to:", interaction.data)
         break
+      }
     }
   }
 
   const handleClick = (e: React.MouseEvent) => {
-    // Останавливаем всплытие, чтобы клик по объекту не считался кликом по фону
     e.stopPropagation()
     dispatch(markObjectInteraction(object.id))
+
     if (!object.interaction) return
+
     if (Array.isArray(object.interaction)) {
-      object.interaction.forEach((int) => handleInteraction(int))
+      object.interaction.forEach((int) => handleInteraction(int as Interaction))
     } else {
-      handleInteraction(object.interaction)
+      handleInteraction(object.interaction as Interaction)
     }
   }
 
   const position = isMobile && object.mobilePosition ? object.mobilePosition : object.position
   const size = isMobile && object.mobileSize ? object.mobileSize : object.size
 
-  // Формируем стили динамически, чтобы не добавлять лишнего
   const dynamicStyles: React.CSSProperties = {
+    position: "absolute",
     left: `${position.x * 100}%`,
     top: `${position.y * 100}%`,
     width: `${size.width * 100}%`,
@@ -78,12 +128,10 @@ export const InteractiveObject: React.FC<Props> = ({ object }) => {
     cursor: "pointer",
   }
 
-  // Если в JSON явно указано centered, только тогда добавляем transform
   if (object.centered) {
     dynamicStyles.transform = "translate(-50%, -50%)"
   }
 
-  // Если указано maxWidth, добавляем его
   if (object.maxWidth) {
     dynamicStyles.maxWidth = object.maxWidth
   }
@@ -92,11 +140,11 @@ export const InteractiveObject: React.FC<Props> = ({ object }) => {
     <div className={`${styles.interactiveObject} ${object.noHover ? styles.noHover : ""}`} style={dynamicStyles} onClick={handleClick}>
       <img
         src={currentGif}
-        alt="Interactive object"
+        alt=""
         className={styles.gif}
         draggable={false}
-        // Если есть maxWidth, картинка должна вписываться, иначе оставляем как было
-        style={object.maxWidth ? { width: "100%", height: "100%", objectFit: "contain" } : {}}
+        decoding="async"
+        style={object.maxWidth ? { width: "100%", height: "100%", objectFit: "contain" } : { width: "100%", height: "100%" }}
       />
     </div>
   )

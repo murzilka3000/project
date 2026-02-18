@@ -7,144 +7,138 @@ import { StoryNavigation } from "./StoryNavigation"
 
 export const StorySlide: React.FC = () => {
   const { stories, currentStoryIndex } = useSelector((state: RootState) => state.story)
-
   const currentStory = stories[currentStoryIndex]
+
   const [imageLoaded, setImageLoaded] = useState(false)
+  const [sequenceReady, setSequenceReady] = useState(false) // Готова ли анимация
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 })
   const [fadeIn, setFadeIn] = useState(false)
 
-  // Состояние переключения слоя
   const [isLayerToggled, setIsLayerToggled] = useState(false)
-
-  // --- Логика последовательности картинок (Sequence) ---
   const [sequenceIndex, setSequenceIndex] = useState(-1)
   const [isSequenceActive, setIsSequenceActive] = useState(false)
-  // Новое состояние: направление анимации (1 = вперед, -1 = назад)
   const [direction, setDirection] = useState(1)
 
+  // Функция для проверки, является ли URL видео
   const isVideo = (url: string | undefined) => {
     if (!url) return false
     return /\.(mp4|webm)$/i.test(url)
   }
 
-  // Сброс состояний при смене слайда
+  // --- ЭФФЕКТ 1: Загрузка основного фона и ПРЕДЗАГРУЗКА последовательности ---
   useEffect(() => {
     setImageLoaded(false)
+    setSequenceReady(false)
     setFadeIn(false)
     setIsLayerToggled(false)
-
-    // Сбрасываем последовательность
     setSequenceIndex(-1)
     setIsSequenceActive(false)
-    setDirection(1) // Сбрасываем направление на "вперед"
+    setDirection(1)
 
     if (!currentStory) return
 
-    // JS Preload для кеша
-    if (currentStory.backgroundSequence && currentStory.backgroundSequence.length > 0) {
-      currentStory.backgroundSequence.forEach((src) => {
+    // Функция для полной загрузки одной картинки с ожиданием декодирования
+    const preloadImage = (src: string): Promise<void> => {
+      return new Promise((resolve) => {
         const img = new Image()
         img.src = src
+        img.onload = () => {
+          // decode() подготавливает картинку для рендеринга, предотвращая лаги при первом показе
+          if ("decode" in img) {
+            img
+              .decode()
+              .then(() => resolve())
+              .catch(() => resolve())
+          } else {
+            resolve()
+          }
+        }
+        img.onerror = () => resolve() // Продолжаем даже если одна картинка упала
       })
     }
 
     const bgIsVideo = isVideo(currentStory.backgroundImage)
-    const srcToLoad = bgIsVideo ? currentStory.baseLayer : currentStory.backgroundImage
+    const mainSrc = bgIsVideo ? currentStory.baseLayer : currentStory.backgroundImage
 
-    if (!srcToLoad) {
+    // 1. Сначала грузим основной фон, чтобы слайд открылся
+    if (mainSrc) {
+      const mainImg = new Image()
+      mainImg.src = mainSrc
+      mainImg.onload = () => {
+        setImageDimensions({ width: mainImg.width, height: mainImg.height })
+        setImageLoaded(true)
+        setTimeout(() => setFadeIn(true), 50)
+
+        // 2. После того как основной фон готов, грузим последовательность в фоне
+        if (currentStory.backgroundSequence && currentStory.backgroundSequence.length > 0) {
+          Promise.all(currentStory.backgroundSequence.map(preloadImage)).then(() => {
+            setSequenceReady(true) // Теперь клики будут работать
+            console.log("Sequence fully preloaded and decoded")
+          })
+        }
+      }
+    } else {
       setImageDimensions({ width: 1920, height: 1080 })
       setImageLoaded(true)
       setTimeout(() => setFadeIn(true), 50)
-      return
     }
+  }, [currentStory?.id])
 
-    const img = new Image()
-    img.onload = () => {
-      setImageDimensions({ width: img.width, height: img.height })
-      setImageLoaded(true)
-      setTimeout(() => setFadeIn(true), 50)
-    }
-    img.onerror = () => {
-      setImageDimensions({ width: 1920, height: 1080 })
-      setImageLoaded(true)
-      setTimeout(() => setFadeIn(true), 50)
-    }
-    img.src = srcToLoad
-  }, [currentStory?.backgroundImage, currentStory?.baseLayer, currentStory?.id])
-
-  // --- Эффект анимации (Таймер) ---
+  // --- ЭФФЕКТ 2: Таймер анимации ---
   useEffect(() => {
     let timeoutId: NodeJS.Timeout
 
     if (isSequenceActive && currentStory.backgroundSequence) {
       const len = currentStory.backgroundSequence.length
-
-      // Вычисляем следующий индекс
       const nextIndex = sequenceIndex + direction
 
-      // Проверяем, находится ли следующий индекс в допустимых пределах (от 0 до len-1)
       if (nextIndex >= 0 && nextIndex < len) {
         timeoutId = setTimeout(() => {
           setSequenceIndex(nextIndex)
         }, currentStory.sequenceInterval || 500)
       } else {
-        // Если вышли за пределы массива — останавливаем анимацию
         setIsSequenceActive(false)
       }
     }
 
     return () => clearTimeout(timeoutId)
-  }, [sequenceIndex, isSequenceActive, direction, currentStory?.backgroundSequence, currentStory?.sequenceInterval])
+  }, [sequenceIndex, isSequenceActive, direction, currentStory?.backgroundSequence])
 
-  if (!currentStory) {
-    return <div>Start</div>
-  }
+  if (!currentStory) return <div>Start</div>
 
-  // --- ОБНОВЛЕННЫЙ ОБРАБОТЧИК КЛИКА ---
+  // --- ОБРАБОТЧИК КЛИКА ---
   const handleContainerClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement
+    if (target.closest('[data-layer="objects"]')) return
 
-    // Игнорируем клик по объектам
-    if (target.closest('[data-layer="objects"]')) {
-      return
-    }
-
-    // 1. Логика Sequence (Вперед / Назад)
+    // Если есть последовательность, но она еще не загрузилась — игнорируем клик
     if (currentStory.backgroundSequence && currentStory.backgroundSequence.length > 0) {
-      const len = currentStory.backgroundSequence.length
+      if (!sequenceReady) {
+        console.log("Waiting for images to load...")
+        return
+      }
 
-      // Если это самый первый запуск (индекс -1), ставим на 0 и запускаем вперед
+      const len = currentStory.backgroundSequence.length
       if (sequenceIndex === -1) {
         setSequenceIndex(0)
         setDirection(1)
-        setIsSequenceActive(true)
-      }
-      // Если мы в самом конце (прошли все кадры) -> разворачиваем назад
-      else if (sequenceIndex === len - 1) {
+      } else if (sequenceIndex === len - 1) {
         setDirection(-1)
-        setIsSequenceActive(true)
-      }
-      // Если мы в начале (вернулись к 0) -> разворачиваем вперед
-      else if (sequenceIndex === 0) {
+      } else if (sequenceIndex === 0) {
         setDirection(1)
-        setIsSequenceActive(true)
-      }
-      // Если кликнули в процессе анимации -> просто меняем направление на противоположное
-      else {
+      } else {
         setDirection((prev) => prev * -1)
-        setIsSequenceActive(true)
       }
-
+      setIsSequenceActive(true)
       return
     }
 
-    // 2. Иначе: Стандартное переключение слоя
     if (currentStory.toggleBaseLayer) {
       setIsLayerToggled((prev) => !prev)
     }
   }
 
-  const containerStyle = imageLoaded && imageDimensions.width > 0 ? { aspectRatio: `${imageDimensions.width} / ${imageDimensions.height}` } : { aspectRatio: "9 / 16" }
+  const containerStyle = imageLoaded ? { aspectRatio: `${imageDimensions.width} / ${imageDimensions.height}` } : { aspectRatio: "9 / 16" }
 
   const activeBaseLayer = isLayerToggled && currentStory.toggleBaseLayer ? currentStory.toggleBaseLayer : currentStory.baseLayer
 
@@ -160,26 +154,23 @@ export const StorySlide: React.FC = () => {
 
   return (
     <div className={styles.storySlide}>
-      <div className={styles.imageContainer} style={containerStyle} onClick={(e) => handleContainerClick(e)}>
+      <div className={styles.imageContainer} style={containerStyle} onClick={handleContainerClick}>
         {/* Ambient background */}
         {imageLoaded && (
           <img
             src={activeBaseLayer || (isVideo(currentStory.backgroundImage) ? "" : currentStory.backgroundImage)}
             alt=""
             className={`${styles.ambientBackground} ${fadeIn ? styles.fadeIn : styles.fadeOut}`}
-            style={{
-              display: isVideo(currentStory.backgroundImage) && !currentStory.baseLayer ? "none" : "block",
-            }}
           />
         )}
 
         {/* Base Layer */}
-        {imageLoaded && activeBaseLayer && <img src={activeBaseLayer} alt="background base" className={`${styles.baseLayer} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} />}
+        {imageLoaded && activeBaseLayer && <img src={activeBaseLayer} alt="" className={`${styles.baseLayer} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} />}
 
-        {/* Main Background (Слой 1 - Статика) */}
+        {/* Слой 1: Статичный фон */}
         {imageLoaded ? renderMainBackground() : <h1 className={styles.backgroundError}>Loading...</h1>}
 
-        {/* Sequence Layer (Слой 2 - Анимация) */}
+        {/* Слой 2: Оптимизированная последовательность (уже в DOM и декодирована) */}
         {imageLoaded &&
           currentStory.backgroundSequence &&
           currentStory.backgroundSequence.map((src, index) => (
@@ -192,12 +183,12 @@ export const StorySlide: React.FC = () => {
                 opacity: sequenceIndex === index ? 1 : 0,
                 pointerEvents: "none",
                 zIndex: 5,
-                transition: "none",
+                transition: "none", // Никаких задержек при переключении
               }}
             />
           ))}
 
-        {/* Interactive Objects (Слой 3) */}
+        {/* Слой 3: Интерактивные объекты */}
         {imageLoaded && (
           <div className={`${styles.objectsLayer} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} style={{ zIndex: 10 }} data-layer="objects">
             {[...currentStory.objects]

@@ -1,100 +1,113 @@
-import { InteractiveObject } from '../types';
+import { InteractiveObject } from "../types"
 
-// Загрузка изображений с кэшированием
-const imageCache = new Map<string, HTMLImageElement>();
+const imageCache = new Map<string, HTMLImageElement>()
 
+// Оптимизированная загрузка с декодированием
 export const loadImage = (url: string): Promise<HTMLImageElement> => {
   if (imageCache.has(url)) {
-    return Promise.resolve(imageCache.get(url)!);
+    return Promise.resolve(imageCache.get(url)!)
   }
 
   return new Promise((resolve, reject) => {
-    const img = new Image();
+    const img = new Image()
+    img.src = url
     img.onload = () => {
-      imageCache.set(url, img);
-      resolve(img);
-    };
-    img.onerror = reject;
-    img.src = url;
-  });
-};
+      // decode() подготавливает изображение в памяти GPU
+      if ("decode" in img) {
+        img
+          .decode()
+          .then(() => {
+            imageCache.set(url, img)
+            resolve(img)
+          })
+          .catch(() => {
+            imageCache.set(url, img)
+            resolve(img)
+          })
+      } else {
+        imageCache.set(url, img)
+        resolve(img)
+      }
+    }
+    img.onerror = reject
+  })
+}
 
-// Проверка попадания клика в объект
+// Проверка попадания клика (учитывает мобилки и центрирование)
 export const isPointInObject = (
   x: number,
   y: number,
   object: InteractiveObject,
   canvasWidth: number,
-  canvasHeight: number
+  canvasHeight: number,
+  isMobile: boolean = false // Добавили флаг мобилки
 ): boolean => {
-  const objX = object.position.x * canvasWidth;
-  const objY = object.position.y * canvasHeight;
-  const objWidth = object.size.width * canvasWidth;
-  const objHeight = object.size.height * canvasHeight;
+  // Выбираем правильные координаты
+  const pos = isMobile && object.mobilePosition ? object.mobilePosition : object.position
+  const size = isMobile && object.mobileSize ? object.mobileSize : object.size
 
-  // Центрируем объект относительно позиции
-  const left = objX - objWidth / 2;
-  const top = objY - objHeight / 2;
+  const objX = pos.x * canvasWidth
+  const objY = pos.y * canvasHeight
+  const objWidth = size.width * canvasWidth
+  const objHeight = size.height * canvasHeight
 
-  return (
-    x >= left &&
-    x <= left + objWidth &&
-    y >= top &&
-    y <= top + objHeight
-  );
-};
+  let left, top
 
-// Отрисовка объекта на canvas
+  if (object.centered) {
+    // Если центрировано — точка (x,y) это центр
+    left = objX - objWidth / 2
+    top = objY - objHeight / 2
+  } else {
+    // Иначе — точка (x,y) это левый верхний угол
+    left = objX
+    top = objY
+  }
+
+  return x >= left && x <= left + objWidth && y >= top && y <= top + objHeight
+}
+
+// Отрисовка объекта (учитывает мобилки и центрирование)
 export const drawObject = (
   ctx: CanvasRenderingContext2D,
   image: HTMLImageElement,
   object: InteractiveObject,
   canvasWidth: number,
   canvasHeight: number,
+  isMobile: boolean = false,
   hover: boolean = false
 ) => {
-  const x = object.position.x * canvasWidth;
-  const y = object.position.y * canvasHeight;
-  const width = object.size.width * canvasWidth;
-  const height = object.size.height * canvasHeight;
+  const pos = isMobile && object.mobilePosition ? object.mobilePosition : object.position
+  const size = isMobile && object.mobileSize ? object.mobileSize : object.size
 
-  ctx.save();
+  const x = pos.x * canvasWidth
+  const y = pos.y * canvasHeight
+  const width = size.width * canvasWidth
+  const height = size.height * canvasHeight
 
-  // Эффект при наведении
-  if (hover) {
-    ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
-    ctx.shadowBlur = 20;
-    ctx.globalAlpha = 1;
+  ctx.save()
+
+  if (hover && !object.noHover) {
+    ctx.shadowColor = "rgba(255, 255, 255, 0.8)"
+    ctx.shadowBlur = 20
   }
 
-  // Рисуем изображение по центру координат
-  ctx.drawImage(
-    image,
-    x - width / 2,
-    y - height / 2,
-    width,
-    height
-  );
+  // Расчет точки отрисовки в зависимости от центрирования
+  const drawX = object.centered ? x - width / 2 : x
+  const drawY = object.centered ? y - height / 2 : y
 
-  ctx.restore();
-};
+  ctx.drawImage(image, drawX, drawY, width, height)
 
-// Отрисовка фона с сохранением пропорций
-// Всегда занимает 100% высоты, ширина масштабируется пропорционально
-export const drawBackground = (
-  ctx: CanvasRenderingContext2D,
-  image: HTMLImageElement,
-  canvasWidth: number,
-  canvasHeight: number
-) => {
-  // Вычисляем ширину изображения при высоте = 100% canvas
-  const scale = canvasHeight / image.height;
-  const drawWidth = image.width * scale;
-  const drawHeight = canvasHeight;
+  ctx.restore()
+}
 
-  // Центрируем по горизонтали (если шире canvas - обрежется по краям)
-  const offsetX = (canvasWidth - drawWidth) / 2;
-  const offsetY = 0;
+// Отрисовка фона
+export const drawBackground = (ctx: CanvasRenderingContext2D, image: HTMLImageElement, canvasWidth: number, canvasHeight: number) => {
+  const scale = canvasHeight / image.height
+  const drawWidth = image.width * scale
+  const drawHeight = canvasHeight
 
-  ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-};
+  const offsetX = (canvasWidth - drawWidth) / 2
+  const offsetY = 0
+
+  ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight)
+}

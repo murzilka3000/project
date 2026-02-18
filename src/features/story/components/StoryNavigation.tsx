@@ -30,17 +30,6 @@ export const StoryNavigation: React.FC = () => {
           <img src="/images/nav_arrow.svg" alt="Next" />
         </button>
       )}
-
-      {/* Описание и информация */}
-      {/* <div className={`${styles.controls}`}>
-        <div className={styles.info}>
-          <div className={styles.progress}>
-            {currentStoryIndex + 1} / {stories.length}
-          </div>
-          {currentStory.title && <div className={styles.title}>{currentStory.title}</div>}
-          {currentStory.description && <div className={styles.description}>{currentStory.description}</div>}
-        </div>
-      </div> */}
     </div>
   )
 }
