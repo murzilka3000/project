@@ -52,17 +52,17 @@
   }
 }
 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 .nightEffect {
   opacity: 0; // Птицы не видно
   pointer-events: none; // Она не мешает кликать по коту
@@ -75,19 +75,31 @@
     animation: birdFly 4s linear forwards !important;
   }
 }
+
 @keyframes birdFly {
   0% {
-    transform: translate(-300%, -50%) scaleX(1); 
-    opacity: 0; // Начинает невидимой за кадром
+    // Начинаем Справа (300%) и Сверху (-150%)
+    // scaleX(-1) разворачивает птицу влево
+    transform: translate(300%, -150%) scaleX(-1);
+    opacity: 0;
   }
-  10% {
-    opacity: 1; // Быстро проявляется, когда влетает
+
+  15% {
+    opacity: 1; // Быстро проявляется при влете
   }
-  90% {
-    opacity: 1; // Видна почти до конца
+
+  // Плавное движение через центр слайда
+  50% {
+    transform: translate(0%, -50%) scaleX(-1);
   }
+
+  85% {
+    opacity: 1; // Все еще видна
+  }
+
   100% {
-    transform: translate(300%, -50%) scaleX(1);
-    opacity: 0; // Снова исчезает у самого края
+    // Улетает Слева (-300%) и Вниз (150%)
+    transform: translate(-300%, 150%) scaleX(-1);
+    opacity: 0;
   }
 }

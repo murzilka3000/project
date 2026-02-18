@@ -48,6 +48,7 @@ export interface Story {
   backgroundEffect?: string
   backgroundSequence?: string[]
   sequenceInterval?: number
+  isBackgroundBottom?: boolean
 }
 
 export interface StoryState {

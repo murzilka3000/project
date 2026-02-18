@@ -63,21 +63,21 @@ export const storiesData: Story[] = [
   {
     id: 2,
     title: "",
-    backgroundImage: "/images/story2/sky.png",
+    //backgroundImage — это теперь то, что ПЕРЕД птицей (Окно)
+    backgroundImage: "/images/story2/window.png",
     audioTrack: "/audio/background-2.mp3",
     description: "",
-    baseLayer: "/images/story2/window.png",
+    //baseLayer — это теперь то, что ЗА птицей (Небо)
+    baseLayer: "/images/story2/sky.png",
     objects: [
       {
         id: "cat",
         gifUrl: "/images/story2/cat-1.png",
         position: { x: 0.55, y: 0.85 },
         size: { width: 0.4, height: 0.17 },
+        zIndex: 10, // СПЕРЕДИ (перед окном)
         interaction: [
-          {
-            type: "replace",
-            data: { replacementGif: "/images/story2/cat.gif", duration: 1500 },
-          },
+          { type: "replace", data: { replacementGif: "/images/story2/cat.gif", duration: 1500 } },
           { type: "sound", data: { soundUrl: "/audio/effects/cat-cound.wav" } },
         ],
       },
@@ -86,15 +86,12 @@ export const storiesData: Story[] = [
         gifUrl: "/images/story2/tulle.gif",
         position: { x: 0.84, y: 0.5 },
         size: { width: 0.5, height: 1 },
+        zIndex: 11, // СПЕРЕДИ (перед окном)
         interaction: [
-          {
-            type: "replace",
-            data: { replacementGif: "/images/story2/tulle.gif", duration: 1500 },
-          },
+          { type: "replace", data: { replacementGif: "/images/story2/tulle.gif", duration: 1500 } },
           { type: "sound", data: { soundUrl: "/audio/effects/tulle-sound.wav" } },
         ],
       },
-
       {
         id: "night-stars",
         gifUrl: "/images/story2/bird.gif",
@@ -102,7 +99,7 @@ export const storiesData: Story[] = [
         size: { width: 0.3, height: 0.2 },
         centered: true,
         noHover: true,
-        zIndex: 1,
+        zIndex: 2, // СЗАДИ (за окном, но перед небом)
         customClass: "nightEffect",
       },
     ],
@@ -110,10 +107,11 @@ export const storiesData: Story[] = [
   {
     id: 3,
     title: "",
-    backgroundImage: "/images/story3/sky.mp4",
     audioTrack: "/audio/background-3.wav",
-    baseLayer: "/images/story3/no-sky.png ",
+    backgroundImage: "/images/story3/sky.mp4",
+    baseLayer: "/images/story3/no-sky.png",
     toggleBaseLayer: "/images/story3/nosky-2.png",
+    isBackgroundBottom: true,
     objects: [
       {
         id: "cat",
@@ -144,6 +142,7 @@ export const storiesData: Story[] = [
     backgroundImage: "/images/story4/nature.mp4",
     baseLayer: "/images/story4/back4.png ",
     audioTrack: "/audio/background-4.mp3",
+    isBackgroundBottom: true,
     objects: [
       {
         id: "book",
@@ -267,9 +266,11 @@ export const storiesData: Story[] = [
     backgroundImage: "/images/story6/sky.mp4",
     baseLayer: "/images/story6/bg.png ",
     audioTrack: "/audio/still.mp3",
+    isBackgroundBottom: true,
     objects: [
       {
         id: "grass",
+        zIndex: 99,
         gifUrl: "/images/story6/grass-1.png",
         position: { x: 0.5, y: 0.8 },
         size: { width: 1, height: 0.5 },
@@ -300,6 +301,7 @@ export const storiesData: Story[] = [
     objects: [
       {
         id: "tree",
+        zIndex: 99,
         gifUrl: "/images/story7/leaves-1.png",
         position: { x: 0.5, y: 0.15 },
         size: { width: 1, height: 0.5 },
@@ -321,6 +323,7 @@ export const storiesData: Story[] = [
       },
       {
         id: "star",
+          zIndex: 100,
         gifUrl: "/images/story7/transparent.png",
         position: { x: 0.4, y: 0.35 },
         size: { width: 0.5, height: 0.5 },
