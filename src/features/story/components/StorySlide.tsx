@@ -19,6 +19,8 @@ export const StorySlide: React.FC = () => {
   // --- Логика последовательности картинок (Sequence) ---
   const [sequenceIndex, setSequenceIndex] = useState(-1)
   const [isSequenceActive, setIsSequenceActive] = useState(false)
+  // Новое состояние: направление анимации (1 = вперед, -1 = назад)
+  const [direction, setDirection] = useState(1)
 
   const isVideo = (url: string | undefined) => {
     if (!url) return false
@@ -34,11 +36,11 @@ export const StorySlide: React.FC = () => {
     // Сбрасываем последовательность
     setSequenceIndex(-1)
     setIsSequenceActive(false)
+    setDirection(1) // Сбрасываем направление на "вперед"
 
     if (!currentStory) return
 
-    // Предзагрузка (Pre-render) в DOM происходит ниже в return,
-    // но JS preload оставим для надежности кеша.
+    // JS Preload для кеша
     if (currentStory.backgroundSequence && currentStory.backgroundSequence.length > 0) {
       currentStory.backgroundSequence.forEach((src) => {
         const img = new Image()
@@ -70,20 +72,29 @@ export const StorySlide: React.FC = () => {
     img.src = srcToLoad
   }, [currentStory?.backgroundImage, currentStory?.baseLayer, currentStory?.id])
 
-  // Эффект для переключения кадров последовательности
+  // --- Эффект анимации (Таймер) ---
   useEffect(() => {
     let timeoutId: NodeJS.Timeout
 
     if (isSequenceActive && currentStory.backgroundSequence) {
-      if (sequenceIndex < currentStory.backgroundSequence.length - 1) {
+      const len = currentStory.backgroundSequence.length
+
+      // Вычисляем следующий индекс
+      const nextIndex = sequenceIndex + direction
+
+      // Проверяем, находится ли следующий индекс в допустимых пределах (от 0 до len-1)
+      if (nextIndex >= 0 && nextIndex < len) {
         timeoutId = setTimeout(() => {
-          setSequenceIndex((prev) => prev + 1)
+          setSequenceIndex(nextIndex)
         }, currentStory.sequenceInterval || 500)
+      } else {
+        // Если вышли за пределы массива — останавливаем анимацию
+        setIsSequenceActive(false)
       }
     }
 
     return () => clearTimeout(timeoutId)
-  }, [sequenceIndex, isSequenceActive, currentStory?.backgroundSequence, currentStory?.sequenceInterval])
+  }, [sequenceIndex, isSequenceActive, direction, currentStory?.backgroundSequence, currentStory?.sequenceInterval])
 
   if (!currentStory) {
     return <div>Start</div>
@@ -93,17 +104,37 @@ export const StorySlide: React.FC = () => {
   const handleContainerClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement
 
-    // Проверяем: клик произошел внутри слоя объектов?
-    // Мы добавили data-layer="objects" в div с объектами (см. в return)
+    // Игнорируем клик по объектам
     if (target.closest('[data-layer="objects"]')) {
-      // Если кликнули по объекту — ничего не делаем с фоном
       return
     }
 
-    // 1. Приоритет: Запуск последовательности
+    // 1. Логика Sequence (Вперед / Назад)
     if (currentStory.backgroundSequence && currentStory.backgroundSequence.length > 0) {
-      setSequenceIndex(0)
-      setIsSequenceActive(true)
+      const len = currentStory.backgroundSequence.length
+
+      // Если это самый первый запуск (индекс -1), ставим на 0 и запускаем вперед
+      if (sequenceIndex === -1) {
+        setSequenceIndex(0)
+        setDirection(1)
+        setIsSequenceActive(true)
+      }
+      // Если мы в самом конце (прошли все кадры) -> разворачиваем назад
+      else if (sequenceIndex === len - 1) {
+        setDirection(-1)
+        setIsSequenceActive(true)
+      }
+      // Если мы в начале (вернулись к 0) -> разворачиваем вперед
+      else if (sequenceIndex === 0) {
+        setDirection(1)
+        setIsSequenceActive(true)
+      }
+      // Если кликнули в процессе анимации -> просто меняем направление на противоположное
+      else {
+        setDirection((prev) => prev * -1)
+        setIsSequenceActive(true)
+      }
+
       return
     }
 
@@ -121,17 +152,14 @@ export const StorySlide: React.FC = () => {
     if (isVideo(currentStory.backgroundImage)) {
       return <video src={currentStory.backgroundImage} className={`${styles.background} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} autoPlay loop muted playsInline />
     }
-
     if (currentStory.backgroundEffect === "pan-x") {
       return <div className={`${styles.animatedBackground} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} style={{ backgroundImage: `url(${currentStory.backgroundImage})` }} />
     }
-
     return <img src={currentStory.backgroundImage} alt={currentStory.title} className={`${styles.background} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} />
   }
 
   return (
     <div className={styles.storySlide}>
-      {/* Передаем событие 'e' в handleContainerClick */}
       <div className={styles.imageContainer} style={containerStyle} onClick={(e) => handleContainerClick(e)}>
         {/* Ambient background */}
         {imageLoaded && (
@@ -151,7 +179,7 @@ export const StorySlide: React.FC = () => {
         {/* Main Background (Слой 1 - Статика) */}
         {imageLoaded ? renderMainBackground() : <h1 className={styles.backgroundError}>Loading...</h1>}
 
-        {/* Sequence Layer (Слой 2 - Анимация без моргания) */}
+        {/* Sequence Layer (Слой 2 - Анимация) */}
         {imageLoaded &&
           currentStory.backgroundSequence &&
           currentStory.backgroundSequence.map((src, index) => (
@@ -162,8 +190,6 @@ export const StorySlide: React.FC = () => {
               className={styles.background}
               style={{
                 opacity: sequenceIndex === index ? 1 : 0,
-                // Важно: pointerEvents: 'none', чтобы клики проходили сквозь эти картинки
-                // и попадали в контейнер (или в объекты, если они выше по Z-index)
                 pointerEvents: "none",
                 zIndex: 5,
                 transition: "none",
@@ -173,12 +199,7 @@ export const StorySlide: React.FC = () => {
 
         {/* Interactive Objects (Слой 3) */}
         {imageLoaded && (
-          <div
-            className={`${styles.objectsLayer} ${fadeIn ? styles.fadeIn : styles.fadeOut}`}
-            style={{ zIndex: 10 }}
-            // Добавили атрибут-метку для проверки в onClick
-            data-layer="objects"
-          >
+          <div className={`${styles.objectsLayer} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} style={{ zIndex: 10 }} data-layer="objects">
             {[...currentStory.objects]
               .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
               .map((object) => (
