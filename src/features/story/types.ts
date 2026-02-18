@@ -40,8 +40,9 @@ export interface Story {
   baseLayer?: string
   toggleBaseLayer?: string
   backgroundEffect?: string
+  backgroundSequence?: string[]
+  sequenceInterval?: number
 }
-
 export interface StoryState {
   stories: Story[]
   currentStoryIndex: number

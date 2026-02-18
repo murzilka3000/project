@@ -11,11 +11,11 @@
   outline: none;
   -webkit-tap-highlight-color: transparent;
 
-  &:not(.noHover) {
-    @include adaptive-hover {
-      filter: brightness(1) drop-shadow(0 0 10px rgba(255, 255, 255, 0.311));
-    }
-  }
+  // &:not(.noHover) {
+  //   @include adaptive-hover {
+  //     filter: brightness(1) drop-shadow(0 0 10px rgba(255, 255, 255, 0.311));
+  //   }
+  // }
 
   &:not(.noHover):active {
     transform: translate(-50%, -50%);
