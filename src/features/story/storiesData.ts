@@ -76,20 +76,11 @@ export const storiesData: Story[] = [
         interaction: [
           {
             type: "replace",
-            data: {
-              replacementGif: "/images/story2/cat.gif",
-              duration: 1500,
-            },
+            data: { replacementGif: "/images/story2/cat.gif", duration: 1500 },
           },
-          {
-            type: "sound",
-            data: {
-              soundUrl: "/audio/effects/cat-cound.wav",
-            },
-          },
+          { type: "sound", data: { soundUrl: "/audio/effects/cat-cound.wav" } },
         ],
       },
-
       {
         id: "tulle",
         gifUrl: "/images/story2/tulle.gif",
@@ -98,18 +89,21 @@ export const storiesData: Story[] = [
         interaction: [
           {
             type: "replace",
-            data: {
-              replacementGif: "/images/story2/tulle.gif",
-              duration: 1500,
-            },
+            data: { replacementGif: "/images/story2/tulle.gif", duration: 1500 },
           },
-          {
-            type: "sound",
-            data: {
-              soundUrl: "/audio/effects/tulle-sound.wav",
-            },
-          },
+          { type: "sound", data: { soundUrl: "/audio/effects/tulle-sound.wav" } },
         ],
+      },
+
+      {
+        id: "night-stars",
+        gifUrl: "/images/story2/bird.gif",
+        position: { x: 0.5, y: 0.35 },
+        size: { width: 0.3, height: 0.2 },
+        centered: true,
+        noHover: true,
+        zIndex: 1,
+        customClass: "nightEffect",
       },
     ],
   },

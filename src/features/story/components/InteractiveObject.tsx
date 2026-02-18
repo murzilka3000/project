@@ -5,7 +5,7 @@ import { InteractiveObject as IInteractiveObject } from "../types"
 import { markObjectInteraction } from "../storySlice"
 import styles from "./InteractiveObject.module.scss"
 
-// Описываем интерфейс данных, чтобы избежать 'any'
+// Описываем интерфейс данных
 interface InteractionData {
   soundUrl?: string
   replacementGif?: string
@@ -21,9 +21,11 @@ interface Interaction {
 
 interface Props {
   object: IInteractiveObject
+  // Добавили проп для реакции на клик по фону слайда
+  isBackgroundToggled?: boolean
 }
 
-export const InteractiveObject: React.FC<Props> = ({ object }) => {
+export const InteractiveObject: React.FC<Props> = ({ object, isBackgroundToggled }) => {
   const dispatch = useDispatch()
   const { isAudioPlaying } = useSelector((state: RootState) => state.story)
   const [currentGif, setCurrentGif] = useState(object.gifUrl)
@@ -68,7 +70,6 @@ export const InteractiveObject: React.FC<Props> = ({ object }) => {
     switch (interaction.type) {
       case "sound": {
         if (isAudioPlaying && interaction.data.soundUrl) {
-          // Вызываем play() сразу, не присваивая переменной, чтобы избежать ошибки unused-vars
           void new Audio(interaction.data.soundUrl).play().catch((e) => console.error("Ошибка звука:", e))
         }
         break
@@ -136,8 +137,18 @@ export const InteractiveObject: React.FC<Props> = ({ object }) => {
     dynamicStyles.maxWidth = object.maxWidth
   }
 
+  // Формируем классы: базовый + noHover + кастомный класс из JSON + класс состояния фона
+  const containerClasses = [
+    styles.interactiveObject,
+    object.noHover ? styles.noHover : "",
+    object.customClass ? styles[object.customClass] : "", // Например "flyingGhost"
+    isBackgroundToggled ? styles.toggled : "", // Добавляет класс .toggled если фон нажат
+  ]
+    .filter(Boolean)
+    .join(" ")
+
   return (
-    <div className={`${styles.interactiveObject} ${object.noHover ? styles.noHover : ""}`} style={dynamicStyles} onClick={handleClick}>
+    <div className={containerClasses} style={dynamicStyles} onClick={handleClick}>
       <img
         src={currentGif}
         alt=""

@@ -17,6 +17,8 @@
     align-items: center;
     justify-content: center;
 
+    isolation: isolate;
+
     .ambientBackground {
       position: absolute;
       width: 100%;
@@ -59,8 +61,7 @@
       z-index: 1;
       pointer-events: none;
       transition: opacity 0.5s ease-in-out;
-
-      // Разрешаем клики только на объектах
+      overflow: hidden;
       > * {
         pointer-events: auto;
       }
@@ -175,12 +176,6 @@
   }
 }
 
-
-
-
-
-
-
 /* Добавьте это в ваш файл стилей */
 
 .baseLayer {
@@ -193,29 +188,27 @@
   z-index: 1; /* Самый нижний уровень */
   transition: opacity 0.5s ease-in-out;
   opacity: 0;
-  
+
   &.fadeIn {
     opacity: 1;
   }
 }
 
 .background {
-  position: absolute; 
-  z-index: 2; 
+  position: absolute;
+  z-index: 2;
 }
 
 .objectsLayer {
   z-index: 10;
 }
 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-
-
+//
+//
+//
+//
+//
+//
+//
+//
+//

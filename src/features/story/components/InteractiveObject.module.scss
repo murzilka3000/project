@@ -51,3 +51,43 @@
     transform: translate(-50%, -50%) translateY(-10px) scale(1.02);
   }
 }
+
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+.nightEffect {
+  opacity: 0; // Птицы не видно
+  pointer-events: none; // Она не мешает кликать по коту
+  transition: opacity 0.3s ease;
+  z-index: 999999;
+
+  &.toggled {
+    opacity: 1;
+    // Запускаем полет: длительность 4 секунды, линейно, до конца
+    animation: birdFly 4s linear forwards !important;
+  }
+}
+@keyframes birdFly {
+  0% {
+    transform: translate(-300%, -50%) scaleX(1); 
+    opacity: 0; // Начинает невидимой за кадром
+  }
+  10% {
+    opacity: 1; // Быстро проявляется, когда влетает
+  }
+  90% {
+    opacity: 1; // Видна почти до конца
+  }
+  100% {
+    transform: translate(300%, -50%) scaleX(1);
+    opacity: 0; // Снова исчезает у самого края
+  }
+}

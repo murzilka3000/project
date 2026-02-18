@@ -10,7 +10,7 @@ export const StorySlide: React.FC = () => {
   const currentStory = stories[currentStoryIndex]
 
   const [imageLoaded, setImageLoaded] = useState(false)
-  const [sequenceReady, setSequenceReady] = useState(false) // Готова ли анимация
+  const [sequenceReady, setSequenceReady] = useState(false) // Готова ли анимация последовательности
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 })
   const [fadeIn, setFadeIn] = useState(false)
 
@@ -43,7 +43,6 @@ export const StorySlide: React.FC = () => {
         const img = new Image()
         img.src = src
         img.onload = () => {
-          // decode() подготавливает картинку для рендеринга, предотвращая лаги при первом показе
           if ("decode" in img) {
             img
               .decode()
@@ -53,14 +52,13 @@ export const StorySlide: React.FC = () => {
             resolve()
           }
         }
-        img.onerror = () => resolve() // Продолжаем даже если одна картинка упала
+        img.onerror = () => resolve()
       })
     }
 
     const bgIsVideo = isVideo(currentStory.backgroundImage)
     const mainSrc = bgIsVideo ? currentStory.baseLayer : currentStory.backgroundImage
 
-    // 1. Сначала грузим основной фон, чтобы слайд открылся
     if (mainSrc) {
       const mainImg = new Image()
       mainImg.src = mainSrc
@@ -69,11 +67,11 @@ export const StorySlide: React.FC = () => {
         setImageLoaded(true)
         setTimeout(() => setFadeIn(true), 50)
 
-        // 2. После того как основной фон готов, грузим последовательность в фоне
+        // После того как основной фон готов, грузим последовательность в фоне
         if (currentStory.backgroundSequence && currentStory.backgroundSequence.length > 0) {
           Promise.all(currentStory.backgroundSequence.map(preloadImage)).then(() => {
-            setSequenceReady(true) // Теперь клики будут работать
-            console.log("Sequence fully preloaded and decoded")
+            setSequenceReady(true)
+            console.log("Sequence fully preloaded")
           })
         }
       }
@@ -84,7 +82,7 @@ export const StorySlide: React.FC = () => {
     }
   }, [currentStory?.id])
 
-  // --- ЭФФЕКТ 2: Таймер анимации ---
+  // --- ЭФФЕКТ 2: Таймер анимации (Sequence) ---
   useEffect(() => {
     let timeoutId: NodeJS.Timeout
 
@@ -102,21 +100,19 @@ export const StorySlide: React.FC = () => {
     }
 
     return () => clearTimeout(timeoutId)
-  }, [sequenceIndex, isSequenceActive, direction, currentStory?.backgroundSequence])
+  }, [sequenceIndex, isSequenceActive, direction, currentStory?.backgroundSequence, currentStory?.sequenceInterval])
 
   if (!currentStory) return <div>Start</div>
 
   // --- ОБРАБОТЧИК КЛИКА ---
   const handleContainerClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement
+    // Если кликнули по интерактивному объекту — не запускаем клик по экрану
     if (target.closest('[data-layer="objects"]')) return
 
-    // Если есть последовательность, но она еще не загрузилась — игнорируем клик
+    // 1. Логика для последовательности (Sequence)
     if (currentStory.backgroundSequence && currentStory.backgroundSequence.length > 0) {
-      if (!sequenceReady) {
-        console.log("Waiting for images to load...")
-        return
-      }
+      if (!sequenceReady) return
 
       const len = currentStory.backgroundSequence.length
       if (sequenceIndex === -1) {
@@ -133,7 +129,12 @@ export const StorySlide: React.FC = () => {
       return
     }
 
-    if (currentStory.toggleBaseLayer) {
+    // 2. Логика переключения слоя и активации кастомных анимаций объектов
+    // Проверяем, есть ли на слайде объекты с кастомными классами анимаций
+    const hasCustomAnimation = currentStory.objects.some((obj) => obj.customClass)
+
+    // Если есть что переключать (второй слой фона ИЛИ анимация объекта)
+    if (currentStory.toggleBaseLayer || hasCustomAnimation) {
       setIsLayerToggled((prev) => !prev)
     }
   }
@@ -167,10 +168,10 @@ export const StorySlide: React.FC = () => {
         {/* Base Layer */}
         {imageLoaded && activeBaseLayer && <img src={activeBaseLayer} alt="" className={`${styles.baseLayer} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} />}
 
-        {/* Слой 1: Статичный фон */}
+        {/* Слой 1: Статичный фон или видео */}
         {imageLoaded ? renderMainBackground() : <h1 className={styles.backgroundError}>Loading...</h1>}
 
-        {/* Слой 2: Оптимизированная последовательность (уже в DOM и декодирована) */}
+        {/* Слой 2: Последовательность ( Sequence ) */}
         {imageLoaded &&
           currentStory.backgroundSequence &&
           currentStory.backgroundSequence.map((src, index) => (
@@ -183,7 +184,7 @@ export const StorySlide: React.FC = () => {
                 opacity: sequenceIndex === index ? 1 : 0,
                 pointerEvents: "none",
                 zIndex: 5,
-                transition: "none", // Никаких задержек при переключении
+                transition: "none",
               }}
             />
           ))}
@@ -194,7 +195,7 @@ export const StorySlide: React.FC = () => {
             {[...currentStory.objects]
               .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
               .map((object) => (
-                <InteractiveObject key={object.id} object={object} />
+                <InteractiveObject key={object.id} object={object} isBackgroundToggled={isLayerToggled} />
               ))}
           </div>
         )}
