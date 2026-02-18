@@ -9,11 +9,12 @@ export const StorySlide: React.FC = () => {
   const { stories, currentStoryIndex } = useSelector((state: RootState) => state.story)
   const currentStory = stories[currentStoryIndex]
 
+  // Состояния для отображения
   const [imageLoaded, setImageLoaded] = useState(false)
-  const [sequenceReady, setSequenceReady] = useState(false)
-  const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 })
+  const [imageDimensions, setImageDimensions] = useState({ width: 1920, height: 1080 })
   const [fadeIn, setFadeIn] = useState(false)
 
+  // Состояния интерактива
   const [isLayerToggled, setIsLayerToggled] = useState(false)
   const [sequenceIndex, setSequenceIndex] = useState(-1)
   const [isSequenceActive, setIsSequenceActive] = useState(false)
@@ -24,9 +25,10 @@ export const StorySlide: React.FC = () => {
     return /\.(mp4|webm)$/i.test(url)
   }
 
+  // ЭФФЕКТ: Мгновенная инициализация слайда (так как всё в кэше)
   useEffect(() => {
+    // 1. Сброс всех состояний предыдущего слайда
     setImageLoaded(false)
-    setSequenceReady(false)
     setFadeIn(false)
     setIsLayerToggled(false)
     setSequenceIndex(-1)
@@ -35,53 +37,40 @@ export const StorySlide: React.FC = () => {
 
     if (!currentStory) return
 
-    const preloadImage = (src: string): Promise<void> => {
-      return new Promise((resolve) => {
-        const img = new Image()
-        img.src = src
-        img.onload = () => {
-          if ("decode" in img) {
-            img
-              .decode()
-              .then(() => resolve())
-              .catch(() => resolve())
-          } else {
-            resolve()
-          }
-        }
-        img.onerror = () => resolve()
-      })
-    }
-
+    // 2. Получаем размеры фона (для aspectRatio)
+    // Мы берем либо baseLayer, либо backgroundImage
     const bgIsVideo = isVideo(currentStory.backgroundImage)
-    const mainSrc = bgIsVideo ? currentStory.baseLayer : currentStory.backgroundImage
+    const src = bgIsVideo ? currentStory.baseLayer : currentStory.backgroundImage
 
-    if (mainSrc) {
-      const mainImg = new Image()
-      mainImg.src = mainSrc
-      mainImg.onload = () => {
-        setImageDimensions({ width: mainImg.width, height: mainImg.height })
+    if (src) {
+      const img = new Image()
+      img.src = src
+      // Так как картинка уже в кэше (после StartScreen), onload сработает почти мгновенно
+      img.onload = () => {
+        setImageDimensions({ width: img.width, height: img.height })
         setImageLoaded(true)
-        setTimeout(() => setFadeIn(true), 50)
-
-        if (currentStory.backgroundSequence && currentStory.backgroundSequence.length > 0) {
-          Promise.all(currentStory.backgroundSequence.map(preloadImage)).then(() => {
-            setSequenceReady(true)
-          })
-        }
+        // Маленькая задержка для запуска CSS fadeIn анимации
+        requestAnimationFrame(() => setFadeIn(true))
+      }
+      // Если по какой-то причине ошибка, все равно показываем слайд
+      img.onerror = () => {
+        setImageLoaded(true)
+        setFadeIn(true)
       }
     } else {
-      setImageDimensions({ width: 1920, height: 1080 })
       setImageLoaded(true)
-      setTimeout(() => setFadeIn(true), 50)
+      setFadeIn(true)
     }
   }, [currentStory?.id])
 
+  // ЭФФЕКТ: Таймер для анимации последовательности (Sequence)
   useEffect(() => {
     let timeoutId: NodeJS.Timeout
+
     if (isSequenceActive && currentStory.backgroundSequence) {
       const len = currentStory.backgroundSequence.length
       const nextIndex = sequenceIndex + direction
+
       if (nextIndex >= 0 && nextIndex < len) {
         timeoutId = setTimeout(() => {
           setSequenceIndex(nextIndex)
@@ -90,17 +79,20 @@ export const StorySlide: React.FC = () => {
         setIsSequenceActive(false)
       }
     }
+
     return () => clearTimeout(timeoutId)
-  }, [sequenceIndex, isSequenceActive, direction, currentStory?.backgroundSequence])
+  }, [sequenceIndex, isSequenceActive, direction, currentStory?.backgroundSequence, currentStory?.sequenceInterval])
 
-  if (!currentStory) return <div>Start</div>
+  if (!currentStory) return <div className={styles.loading}>Loading story...</div>
 
+  // ОБРАБОТЧИК КЛИКА ПО ЭКРАНУ
   const handleContainerClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement
+    // Если кликнули по InteractiveObject, блокируем клик по фону
     if (target.tagName === "IMG" && target.closest('[data-layer="objects"]')) return
 
+    // 1. Приоритет: Анимация последовательности картинок
     if (currentStory.backgroundSequence && currentStory.backgroundSequence.length > 0) {
-      if (!sequenceReady) return
       const len = currentStory.backgroundSequence.length
       if (sequenceIndex === -1) {
         setSequenceIndex(0)
@@ -116,42 +108,47 @@ export const StorySlide: React.FC = () => {
       return
     }
 
+    // 2. Обычное переключение слоев или запуск customClass анимаций
     const hasCustomAnimation = currentStory.objects.some((obj) => obj.customClass)
     if (currentStory.toggleBaseLayer || hasCustomAnimation) {
       setIsLayerToggled((prev) => !prev)
     }
   }
 
-  const containerStyle = imageLoaded ? { aspectRatio: `${imageDimensions.width} / ${imageDimensions.height}` } : { aspectRatio: "9 / 16" }
+  // Расчет пропорций контейнера
+  const containerStyle = {
+    aspectRatio: `${imageDimensions.width} / ${imageDimensions.height}`,
+  }
 
+  // Какой слой показывать в baseLayer (обычный или переключенный)
   const activeBaseLayer = isLayerToggled && currentStory.toggleBaseLayer ? currentStory.toggleBaseLayer : currentStory.baseLayer
 
+  // Рендер основного слоя (видео или картинка)
   const renderMainBackground = (zIndex: number) => {
     const content = isVideo(currentStory.backgroundImage) ? (
       <video src={currentStory.backgroundImage} className={`${styles.background} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} autoPlay loop muted playsInline />
     ) : currentStory.backgroundEffect === "pan-x" ? (
       <div className={`${styles.animatedBackground} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} style={{ backgroundImage: `url(${currentStory.backgroundImage})` }} />
     ) : (
-      <img src={currentStory.backgroundImage} alt={currentStory.title} className={`${styles.background} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} />
+      <img src={currentStory.backgroundImage} alt="" className={`${styles.background} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} />
     )
 
     return <div style={{ zIndex, position: "absolute", width: "100%", height: "100%", top: 0, left: 0 }}>{content}</div>
   }
 
-  // Объекты слоями
+  // Разделение объектов на "Задние" (за основным фоном) и "Передние" (поверх всего)
   const behindObjects = currentStory.objects.filter((obj) => (obj.zIndex || 0) < 5)
   const frontObjects = currentStory.objects.filter((obj) => (obj.zIndex || 0) >= 5)
 
-  // ОПРЕДЕЛЯЕМ ПОРЯДОК СЛОЕВ
-  // Если isBackgroundBottom: true, то видео на zIndex 1, а комната на zIndex 3
-  // Если false (по умолчанию), то комната на 1, а видео на 3
+  // Z-Index логика для Sandwich-эффекта
   const mainBgZ = currentStory.isBackgroundBottom ? 1 : 3
   const baseLayerZ = currentStory.isBackgroundBottom ? 3 : 1
 
   return (
     <div className={styles.storySlide}>
+      {/* imageContainer теперь обрезает всё лишнее внутри через styles (overflow: hidden) */}
       <div className={styles.imageContainer} style={containerStyle} onClick={handleContainerClick}>
-        {/* Ambient background */}
+        {/* 1. РАЗМЫТЫЙ ЗАДНИЙ ФОН (Ambient) */}
         {imageLoaded && (
           <img
             src={activeBaseLayer || (isVideo(currentStory.backgroundImage) ? "" : currentStory.backgroundImage)}
@@ -160,12 +157,12 @@ export const StorySlide: React.FC = () => {
           />
         )}
 
-        {/* 1. Слой baseLayer (Комната или Небо) */}
+        {/* 2. НИЖНИЙ СЛОЙ (baseLayer: например, Небо) */}
         {imageLoaded && activeBaseLayer && (
           <img src={activeBaseLayer} alt="" className={`${styles.baseLayer} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} style={{ zIndex: baseLayerZ }} />
         )}
 
-        {/* 2. Объекты сзади (Птица) */}
+        {/* 3. СЛОЙ ОБЪЕКТОВ СЗАДИ (zIndex < 5: например, птица за окном) */}
         {imageLoaded && (
           <div className={styles.objectsLayer} style={{ zIndex: 2 }} data-layer="objects">
             {behindObjects.map((obj) => (
@@ -174,10 +171,10 @@ export const StorySlide: React.FC = () => {
           </div>
         )}
 
-        {/* 3. Основной фон (Видео или Окно) */}
-        {imageLoaded ? renderMainBackground(mainBgZ) : <h1 className={styles.backgroundError}>Loading...</h1>}
+        {/* 4. ОСНОВНОЙ СЛОЙ (backgroundImage: например, Окно или Видео) */}
+        {imageLoaded ? renderMainBackground(mainBgZ) : <div className={styles.loader}>Loading assets...</div>}
 
-        {/* 4. Sequence Layer */}
+        {/* 5. ПОСЛЕДОВАТЕЛЬНОСТЬ (Sequence Animation) */}
         {imageLoaded &&
           currentStory.backgroundSequence?.map((src, index) => (
             <img
@@ -185,11 +182,16 @@ export const StorySlide: React.FC = () => {
               src={src}
               alt=""
               className={styles.background}
-              style={{ opacity: sequenceIndex === index ? 1 : 0, pointerEvents: "none", zIndex: 5, transition: "none" }}
+              style={{
+                opacity: sequenceIndex === index ? 1 : 0,
+                pointerEvents: "none",
+                zIndex: 5,
+                transition: "none",
+              }}
             />
           ))}
 
-        {/* 5. Объекты спереди (Кот, Тюль) */}
+        {/* 6. СЛОЙ ОБЪЕКТОВ СПЕРЕДИ (zIndex >= 5: например, Кот, Тюль) */}
         {imageLoaded && (
           <div className={styles.objectsLayer} style={{ zIndex: 10 }} data-layer="objects">
             {frontObjects.map((obj) => (
@@ -198,6 +200,7 @@ export const StorySlide: React.FC = () => {
           </div>
         )}
 
+        {/* Навигация (стрелки) */}
         <StoryNavigation />
       </div>
     </div>

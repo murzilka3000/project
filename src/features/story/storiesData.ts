@@ -15,6 +15,7 @@ export const storiesData: Story[] = [
         position: { x: 0.84, y: 0.6 },
         mobilePosition: { x: 0.84, y: 0.607 },
         size: { width: 0.1, height: 0.09 },
+        zIndex: 99,
       },
       {
         id: "plant",
@@ -39,6 +40,7 @@ export const storiesData: Story[] = [
       },
       {
         id: "lamp",
+        zIndex: 99,
         gifUrl: "/images/story1/lamp.png",
         position: { x: 0.26, y: 0.6 },
         size: { width: 0.2, height: 0.14 },
@@ -114,10 +116,11 @@ export const storiesData: Story[] = [
     isBackgroundBottom: true,
     objects: [
       {
-        id: "cat",
+        id: "catw",
         gifUrl: "/images/story3/flower-1.png",
         position: { x: 0.7, y: 0.83 },
         size: { width: 0.3, height: 0.17 },
+        zIndex: 99,
         interaction: [
           {
             type: "replace",
@@ -149,6 +152,7 @@ export const storiesData: Story[] = [
         gifUrl: "/images/story4/book-1.png",
         position: { x: 0.37, y: 0.66 },
         size: { width: 0.37, height: 0.17 },
+        zIndex: 99,
         interaction: [
           {
             type: "replace",
@@ -170,6 +174,7 @@ export const storiesData: Story[] = [
         gifUrl: "/images/story4/smoke.gif",
         position: { x: 0.64, y: 0.56 },
         size: { width: 0.14, height: 0.17 },
+        zIndex: 99,
         interaction: [
           {
             type: "replace",
@@ -199,6 +204,7 @@ export const storiesData: Story[] = [
         gifUrl: "/images/story5/table-1.png",
         position: { x: 0.34, y: 0.22 },
         size: { width: 0.67, height: 0.17 },
+        zIndex: 99,
         interaction: [
           {
             type: "replace",
@@ -220,6 +226,7 @@ export const storiesData: Story[] = [
         gifUrl: "/images/story5/red.png",
         position: { x: 0.6478, y: 0.4824 },
         size: { width: 0.033, height: 0.17 },
+        zIndex: 99,
         interaction: [
           {
             type: "replace",
@@ -305,6 +312,7 @@ export const storiesData: Story[] = [
         gifUrl: "/images/story7/leaves-1.png",
         position: { x: 0.5, y: 0.15 },
         size: { width: 1, height: 0.5 },
+
         interaction: [
           {
             type: "replace",
@@ -323,7 +331,7 @@ export const storiesData: Story[] = [
       },
       {
         id: "star",
-          zIndex: 100,
+        zIndex: 100,
         gifUrl: "/images/story7/transparent.png",
         position: { x: 0.4, y: 0.35 },
         size: { width: 0.5, height: 0.5 },
@@ -358,7 +366,8 @@ export const storiesData: Story[] = [
         position: { x: 0.5, y: 0.5 },
         size: { width: 1.3, height: 0.6 },
         centered: true,
-        maxWidth: "550px",
+        maxWidth: "450px",
+        zIndex: 99,
         interaction: [
           {
             type: "replace",
