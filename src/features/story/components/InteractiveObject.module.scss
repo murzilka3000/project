@@ -1,0 +1,53 @@
+@use "@/styles/mixins" as *;
+
+.interactiveObject {
+  position: absolute;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+  user-select: none;
+  transform: translate(-50%, -50%);
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:not(.noHover) {
+    @include adaptive-hover {
+      filter: brightness(1) drop-shadow(0 0 10px rgba(255, 255, 255, 0.311));
+    }
+  }
+
+  &:not(.noHover):active {
+    transform: translate(-50%, -50%);
+  }
+
+  &.animating {
+    animation: bounce 1s ease;
+  }
+
+  .gif {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+  }
+  @media (max-width: 769px) {
+    cursor: auto;
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateY(0) scale(1);
+  }
+  25% {
+    transform: translate(-50%, -50%) translateY(-20px) scale(1.05);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(0) scale(1);
+  }
+  75% {
+    transform: translate(-50%, -50%) translateY(-10px) scale(1.02);
+  }
+}

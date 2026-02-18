@@ -1,0 +1,53 @@
+# Файлы и папки операционной системы
+.DS_Store
+Thumbs.db
+
+# Логи и временные файлы
+*.log
+*.tmp
+*.temp
+*.zip
+
+# Редакторы и IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Зависимости
+node_modules/
+/.pnp
+.pnp.js
+
+# Кэши
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Сборка и выходные файлы
+/dist/
+/build/
+/.out
+/.next
+/coverage
+
+# Переменные окружения
+.env*.local
+.env
+.env.development
+.env.production
+.env.test
+
+# Debug-файлы
+debug.log
+
+# TypeScript кэш
+*.tsbuildinfo
+
+# Прочие
+.eslintcache
+*.jsi

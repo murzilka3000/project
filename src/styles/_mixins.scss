@@ -1,0 +1,15 @@
+@mixin adaptive-hover {
+  @media (hover: hover) {
+    &:hover {
+      @content;
+    }
+  }
+
+  @media (hover: none) {
+    &:active {
+      @content;
+    }
+  }
+}
+// @use "@/styles/mixins" as *;
+// @include adaptive-hover {color: var(--color-text) !important;}

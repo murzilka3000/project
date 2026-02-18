@@ -1,0 +1,150 @@
+@use "@/styles/mixins" as *;
+
+.navigation {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  // background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  z-index: 1000;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+
+  .arrowButton {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    pointer-events: auto;
+
+    @include adaptive-hover {
+      transform: translateY(-50%) scale(0.9);
+    }
+
+    img {
+      width: 24px;
+      height: 24px;
+      filter: brightness(0) invert(1);
+    }
+
+    &.navLeft {
+      left: 15px;
+
+      img {
+        transform: scaleX(-1);
+      }
+    }
+
+    &.navRight {
+      right: 15px;
+    }
+  }
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translate(-50%);
+
+    .info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+
+      .progress {
+        color: white;
+        font-size: 14px;
+        font-weight: 500;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 4px 12px;
+        border-radius: 12px;
+        backdrop-filter: blur(5px);
+      }
+
+      .title {
+        color: white;
+        font-size: 18px;
+        font-weight: 600;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .description {
+        color: white;
+        font-size: 14px;
+        text-align: center;
+        max-width: 600px;
+        opacity: 0.9;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .navigation {
+    padding: 15px 20px;
+
+    .arrowButton {
+      width: 40px;
+      height: 40px;
+
+      img {
+        width: 20px;
+        height: 20px;
+      }
+
+      &.navLeft {
+        left: 10px;
+      }
+
+      &.navRight {
+        right: 10px;
+      }
+    }
+
+    .controls {
+      gap: 5px;
+
+      .info {
+        gap: 5px;
+
+        .progress {
+          font-size: 12px;
+        }
+
+        .title {
+          font-size: 14px;
+        }
+
+        .description {
+          font-size: 12px;
+          max-width: 400px;
+        }
+      }
+    }
+  }
+}
+
+@keyframes moveBottom {
+  0% {
+    bottom: 50%;
+  }
+  100% {
+    bottom: 15px;
+  }
+}

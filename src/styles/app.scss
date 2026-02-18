@@ -1,0 +1,14 @@
+@use "fonts" as *;
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  font-family: "PixelFont", monospace;
+  font-weight: 100;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 1.4rem;
+  font-weight: normal;
+  font-style: normal;
+}
