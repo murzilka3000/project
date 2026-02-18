@@ -202,7 +202,7 @@ export const storiesData: Story[] = [
     audioTrack: "/audio/train-horn-sound-crop.mp3",
     objects: [
       {
-        id: "book",
+        id: "table",
         gifUrl: "/images/story5/table-1.png",
         position: { x: 0.34, y: 0.22 },
         size: { width: 0.67, height: 0.17 },
@@ -218,6 +218,27 @@ export const storiesData: Story[] = [
             type: "sound",
             data: {
               soundUrl: "/audio/effects/table-sound.wav",
+            },
+          },
+        ],
+      },
+      {
+        id: "red",
+        gifUrl: "/images/story5/red.png",
+        position: { x: 0.6478, y: 0.4824 },
+        size: { width: 0.033, height: 0.17 },
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/story5/green.png",
+              duration: 1500,
+            },
+          },
+          {
+            type: "sound",
+            data: {
+              soundUrl: "/audio/effects/go.mp3",
             },
           },
         ],
