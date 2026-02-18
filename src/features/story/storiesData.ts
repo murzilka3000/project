@@ -245,12 +245,36 @@ export const storiesData: Story[] = [
       },
     ],
   },
+
   {
     id: 6,
     title: "",
-    backgroundImage: "/images/story6/background-6.jpg",
-    audioTrack: "/audio/background-6.mp3",
-    objects: [],
+    backgroundImage: "/images/story6/sky.mp4",
+    baseLayer: "/images/story6/bg.png ",
+    audioTrack: "/audio/still.mp3",
+    objects: [
+      {
+        id: "grass",
+        gifUrl: "/images/story6/grass-1.png",
+        position: { x: 0.5, y: 0.8 },
+        size: { width: 1, height: 0.5 },
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/story6/grass.gif",
+              duration: 1500,
+            },
+          },
+          {
+            type: "sound",
+            data: {
+              soundUrl: "/audio/effects/grass-sound.mp3",
+            },
+          },
+        ],
+      },
+    ],
   },
   {
     id: 7,
