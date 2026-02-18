@@ -13,6 +13,10 @@ export interface InteractiveObject {
     width: number
     height: number
   }
+  // --- ДОБАВЛЕНО ---
+  maxWidth?: string | number // Например "400px" или "50%"
+  centered?: boolean // Если true, сдвигает объект на -50% -50% (идеальный центр)
+  // -----------------
   mobileSize?: {
     width: number
     height: number

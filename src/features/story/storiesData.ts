@@ -2,6 +2,77 @@ import { Story } from "./types"
 
 export const storiesData: Story[] = [
   {
+    id: 5,
+    title: "",
+    backgroundImage: "/images/story5/back.png",
+    audioTrack: "/audio/effects/go.mp3",
+    objects: [
+      {
+        id: "table",
+        gifUrl: "/images/story5/table-1.png",
+        position: { x: 0.34, y: 0.22 },
+        size: { width: 0.67, height: 0.17 },
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/story5/table.gif",
+              duration: 1500,
+            },
+          },
+          {
+            type: "sound",
+            data: {
+              soundUrl: "/audio/effects/table-sound.wav",
+            },
+          },
+        ],
+      },
+      {
+        id: "red",
+        gifUrl: "/images/story5/red.png",
+        position: { x: 0.6478, y: 0.4824 },
+        size: { width: 0.033, height: 0.17 },
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/story5/green.png",
+              duration: 1500,
+            },
+          },
+          // {
+          //   type: "sound",
+          //   data: {
+          //     soundUrl: "/audio/effects/go.mp3",
+          //   },
+          // },
+        ],
+      },
+      {
+        id: "tr",
+        gifUrl: "/images/story5/transparent.png",
+        position: { x: 0.6478, y: 0.7824 },
+        size: { width: 0.5, height: 0.27 },
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/story5/transparent.png",
+              duration: 1500,
+            },
+          },
+          {
+            type: "sound",
+            data: {
+              soundUrl: "/audio/train-horn-sound-crop.mp3",
+            },
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: 1,
     title: "Akiaura Story Ch. 1",
     backgroundImage: "/images/story1/background.png",
@@ -195,56 +266,6 @@ export const storiesData: Story[] = [
       },
     ],
   },
-  {
-    id: 5,
-    title: "",
-    backgroundImage: "/images/story5/back.png",
-    audioTrack: "/audio/train-horn-sound-crop.mp3",
-    objects: [
-      {
-        id: "table",
-        gifUrl: "/images/story5/table-1.png",
-        position: { x: 0.34, y: 0.22 },
-        size: { width: 0.67, height: 0.17 },
-        interaction: [
-          {
-            type: "replace",
-            data: {
-              replacementGif: "/images/story5/table.gif",
-              duration: 1500,
-            },
-          },
-          {
-            type: "sound",
-            data: {
-              soundUrl: "/audio/effects/table-sound.wav",
-            },
-          },
-        ],
-      },
-      {
-        id: "red",
-        gifUrl: "/images/story5/red.png",
-        position: { x: 0.6478, y: 0.4824 },
-        size: { width: 0.033, height: 0.17 },
-        interaction: [
-          {
-            type: "replace",
-            data: {
-              replacementGif: "/images/story5/green.png",
-              duration: 1500,
-            },
-          },
-          {
-            type: "sound",
-            data: {
-              soundUrl: "/audio/effects/go.mp3",
-            },
-          },
-        ],
-      },
-    ],
-  },
 
   {
     id: 6,
@@ -339,7 +360,8 @@ export const storiesData: Story[] = [
         gifUrl: "/link.svg",
         position: { x: 0.5, y: 0.5 },
         size: { width: 1.3, height: 0.6 },
-        // -----------------------------------
+        centered: true,
+        maxWidth: "550px",
         interaction: [
           {
             type: "replace",
