@@ -2,6 +2,36 @@ import { Story } from "./types"
 
 export const storiesData: Story[] = [
   {
+    id: 7,
+    title: "",
+    backgroundImage: "/images/story7/bg1.jpg",
+    audioTrack: "/audio/while.mp3",
+    // baseLayer: "/images/story4/back4.png ",
+    objects: [
+      {
+        id: "tree",
+        gifUrl: "/images/story7/leaves-1.png",
+        position: { x: 0.50, y: 0.15 },
+        size: { width: 1, height: 0.5 },
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/story7/leaves.gif",
+              duration: 1500,
+            },
+          },
+          {
+            type: "sound",
+            data: {
+              soundUrl: "/audio/effects/leaves-sound.mp3",
+            },
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: 1,
     title: "Akiaura Story Ch. 1",
     backgroundImage: "/images/story1/background.png",
@@ -252,18 +282,13 @@ export const storiesData: Story[] = [
     audioTrack: "/audio/background-6.mp3",
     objects: [],
   },
-  {
-    id: 7,
-    title: "",
-    backgroundImage: "/images/story7/background-7.jpg",
-    audioTrack: "/audio/background-7.mp3",
-    objects: [],
-  },
+
   {
     id: 8,
     title: "",
     backgroundImage: "/images/story8/background-8.jpg",
-    audioTrack: "/audio/background-8.mp3",
+
+    audioTrack: "/audio/while.mp3",
     description: "The End",
     objects: [],
   },
