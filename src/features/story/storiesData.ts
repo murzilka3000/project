@@ -119,7 +119,7 @@ export const storiesData: Story[] = [
     backgroundImage: "/images/story3/sky.mp4",
     audioTrack: "/audio/background-3.wav",
     baseLayer: "/images/story3/no-sky.png ",
-    toggleBaseLayer: "/images/story3/no-sky-3-tiny.png",
+    toggleBaseLayer: "/images/story3/nosky-2.png",
     objects: [
       {
         id: "cat",
