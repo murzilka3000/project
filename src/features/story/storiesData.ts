@@ -147,9 +147,53 @@ export const storiesData: Story[] = [
   {
     id: 4,
     title: "",
-    backgroundImage: "/images/story4/background-4.jpg",
+    backgroundImage: "/images/story4/nature.mp4",
+    baseLayer: "/images/story4/back4.png ",
     audioTrack: "/audio/background-4.mp3",
-    objects: [],
+    objects: [
+      {
+        id: "book",
+        gifUrl: "/images/story4/book-1.png",
+        position: { x: 0.37, y: 0.66 },
+        size: { width: 0.37, height: 0.17 },
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/story4/book.gif",
+              duration: 1500,
+            },
+          },
+          {
+            type: "sound",
+            data: {
+              soundUrl: "/audio/book-sound.wav",
+            },
+          },
+        ],
+      },
+      {
+        id: "cap",
+        gifUrl: "/images/story4/smoke.gif",
+        position: { x: 0.64, y: 0.56 },
+        size: { width: 0.14, height: 0.17 },
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/story4/smoke.gif",
+              duration: 1500,
+            },
+          },
+          // {
+          //   type: "sound",
+          //   data: {
+          //     soundUrl: "/audio/effects/flowers-sound.mp3",
+          //   },
+          // },
+        ],
+      },
+    ],
   },
   {
     id: 5,
