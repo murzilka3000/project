@@ -249,6 +249,7 @@ export const storiesData: Story[] = [
         gifUrl: "/images/story5/transparent.png",
         position: { x: 0.6478, y: 0.7824 },
         size: { width: 0.5, height: 0.27 },
+        zIndex: 99,
         interaction: [
           {
             type: "replace",
