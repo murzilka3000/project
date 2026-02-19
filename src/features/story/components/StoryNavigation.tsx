@@ -11,23 +11,22 @@ export const StoryNavigation: React.FC = () => {
 
   const isFirst = currentStoryIndex === 0
   const isLast = currentStoryIndex === stories.length - 1
-  // const currentStory = stories[currentStoryIndex]
+
+  if (isLast) return null
 
   return (
     <div className={styles.navigation}>
-      {/* Кнопка звука */}
       <AudioToggle />
 
-      {/* Кнопки навигации */}
       {!isFirst && (
         <button className={`${styles.arrowButton} ${styles.navLeft}`} onClick={() => dispatch(prevStory())}>
-          <img src="/images/nav_arrow.svg" alt="Previous" />
+          <img src="/images/nav_arrow.svg" alt="Previous" draggable={false} />
         </button>
       )}
 
       {!isLast && (
         <button className={`${styles.arrowButton} ${styles.navRight}`} onClick={() => dispatch(nextStory())}>
-          <img src="/images/nav_arrow.svg" alt="Next" />
+          <img src="/images/nav_arrow.svg" alt="Next" draggable={false} />
         </button>
       )}
     </div>
