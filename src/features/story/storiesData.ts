@@ -164,6 +164,7 @@ export const storiesData: Story[] = [
     toggleBaseLayer: "/images/story3/nosky-2.png",
     isBackgroundBottom: true,
     backgroundHeight: "50%",
+    clickSound: "/audio/effects/windows-sound.mp3",
     objects: [
       {
         id: "catw",
@@ -318,7 +319,7 @@ export const storiesData: Story[] = [
           {
             type: "sound",
             data: {
-              soundUrl: "/audio/effects/table-sound.wav",
+              soundUrl: "/audio/effects/table-sound.mp3",
             },
           },
         ],
@@ -337,12 +338,12 @@ export const storiesData: Story[] = [
               duration: 1500,
             },
           },
-          // {
-          //   type: "sound",
-          //   data: {
-          //     soundUrl: "/audio/effects/go.mp3",
-          //   },
-          // },
+          {
+            type: "sound",
+            data: {
+              soundUrl: "/audio/effects/color-sound.wav",
+            },
+          },
         ],
       },
       {
@@ -459,6 +460,7 @@ export const storiesData: Story[] = [
     backgroundImage: "/images/story7/bg1.webp",
     audioTrack: "/audio/while.mp3",
     backgroundSequence: ["/images/story7/bg1.webp", "/images/story7/bg2.webp", "/images/story7/bg4.webp"],
+    sequenceSound: "/audio/effects/windows-sound-7.mp3",
     objects: [
       {
         id: "tree",

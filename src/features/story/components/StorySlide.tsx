@@ -7,7 +7,7 @@ import { StoryNavigation } from "./StoryNavigation"
 import { getVideoElement } from "../utils/assetLoader"
 
 export const StorySlide: React.FC = () => {
-  const { stories, currentStoryIndex } = useSelector((state: RootState) => state.story)
+  const { stories, currentStoryIndex, isAudioPlaying } = useSelector((state: RootState) => state.story)
   const currentStory = stories[currentStoryIndex]
   const videoContainerRef = useRef<HTMLDivElement>(null)
   const prevStoryIdRef = useRef<number | null>(null)
@@ -108,6 +108,9 @@ export const StorySlide: React.FC = () => {
       if (nextIndex >= 0 && nextIndex < len) {
         timeoutId = setTimeout(() => {
           setSequenceIndex(nextIndex)
+          if (currentStory.sequenceSound && isAudioPlaying) {
+            new Audio(currentStory.sequenceSound).play().catch(() => {})
+          }
         }, currentStory.sequenceInterval || 500)
       } else {
         setIsSequenceActive(false)
@@ -115,13 +118,18 @@ export const StorySlide: React.FC = () => {
     }
 
     return () => clearTimeout(timeoutId)
-  }, [sequenceIndex, isSequenceActive, direction, currentStory?.backgroundSequence, currentStory?.sequenceInterval])
+  }, [sequenceIndex, isSequenceActive, direction, currentStory?.backgroundSequence, currentStory?.sequenceInterval, currentStory?.sequenceSound, isAudioPlaying])
 
   if (!currentStory) return <div className={styles.loading}>Loading story...</div>
 
   const handleContainerClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement
     if (target.tagName === "IMG" && target.closest('[data-layer="objects"]')) return
+
+    if (currentStory.clickSound && isAudioPlaying) {
+      const audio = new Audio(currentStory.clickSound)
+      audio.play().catch(() => {})
+    }
 
     if (currentStory.videoSpeedOnClick && isVideo(currentStory.backgroundImage)) {
       const video = getVideoElement(currentStory.backgroundImage!)
@@ -142,6 +150,9 @@ export const StorySlide: React.FC = () => {
       if (sequenceIndex === -1) {
         setSequenceIndex(0)
         setDirection(1)
+        if (currentStory.sequenceSound && isAudioPlaying) {
+          new Audio(currentStory.sequenceSound).play().catch(() => {})
+        }
       } else if (sequenceIndex === len - 1) {
         setDirection(-1)
       } else if (sequenceIndex === 0) {

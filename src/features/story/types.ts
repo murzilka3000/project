@@ -41,6 +41,8 @@ export interface Story {
   title: string
   backgroundImage: string
   audioTrack?: string
+  clickSound?: string
+  sequenceSound?: string // Добавьте это поле для звука при смене кадров последовательности
   objects: InteractiveObject[]
   description?: string
   baseLayer?: string
