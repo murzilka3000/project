@@ -203,7 +203,7 @@ export const storiesData: Story[] = [
       {
         id: "table",
         gifUrl: "/images/story5/table-1.png",
-        position: { x: 0.34, y: 0.22 },
+        position: { x: 0.34, y: 0.215 },
         size: { width: 0.67, height: 0.17 },
         zIndex: 99,
         interaction: [
