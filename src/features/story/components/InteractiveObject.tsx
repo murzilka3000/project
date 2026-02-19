@@ -5,13 +5,13 @@ import { InteractiveObject as IInteractiveObject } from "../types"
 import { markObjectInteraction } from "../storySlice"
 import styles from "./InteractiveObject.module.scss"
 
-
 interface InteractionData {
   soundUrl?: string
   replacementGif?: string
   duration?: number
   url?: string
   target?: string
+  fileName?: string
 }
 
 interface Interaction {
@@ -21,7 +21,6 @@ interface Interaction {
 
 interface Props {
   object: IInteractiveObject
-  // Добавили проп для реакции на клик по фону слайда
   isBackgroundToggled?: boolean
 }
 
@@ -33,7 +32,6 @@ export const InteractiveObject: React.FC<Props> = ({ object, isBackgroundToggled
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // 1. Определение мобильного устройства
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 768px)")
     setIsMobile(mediaQuery.matches)
@@ -46,7 +44,6 @@ export const InteractiveObject: React.FC<Props> = ({ object, isBackgroundToggled
     }
   }, [])
 
-  // 2. Предзагрузка ресурсов (Preloading)
   useEffect(() => {
     setCurrentGif(object.gifUrl)
 
@@ -70,7 +67,7 @@ export const InteractiveObject: React.FC<Props> = ({ object, isBackgroundToggled
     switch (interaction.type) {
       case "sound": {
         if (isAudioPlaying && interaction.data.soundUrl) {
-          void new Audio(interaction.data.soundUrl).play().catch((e) => console.error("Ошибка звука:", e))
+          void new Audio(interaction.data.soundUrl).play().catch((e) => console.error(e))
         }
         break
       }
@@ -96,8 +93,23 @@ export const InteractiveObject: React.FC<Props> = ({ object, isBackgroundToggled
         break
       }
 
+      case "download": {
+        if (interaction.data.url) {
+          const link = document.createElement("a")
+          link.href = interaction.data.url
+          if (interaction.data.fileName) {
+            link.download = interaction.data.fileName
+          } else {
+            link.setAttribute("download", "")
+          }
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+        }
+        break
+      }
+
       case "navigate": {
-        console.log("Navigate to:", interaction.data)
         break
       }
     }
@@ -137,12 +149,11 @@ export const InteractiveObject: React.FC<Props> = ({ object, isBackgroundToggled
     dynamicStyles.maxWidth = object.maxWidth
   }
 
-  // Формируем классы: базовый + noHover + кастомный класс из JSON + класс состояния фона
   const containerClasses = [
     styles.interactiveObject,
     object.noHover ? styles.noHover : "",
-    object.customClass ? styles[object.customClass] : "", // Например "flyingGhost"
-    isBackgroundToggled ? styles.toggled : "", // Добавляет класс .toggled если фон нажат
+    object.customClass ? styles[object.customClass] : "",
+    isBackgroundToggled ? styles.toggled : "",
   ]
     .filter(Boolean)
     .join(" ")

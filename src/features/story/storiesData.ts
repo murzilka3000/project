@@ -61,6 +61,31 @@ export const storiesData: Story[] = [
           },
         ],
       },
+      {
+        id: "dow",
+        gifUrl: "/images/Download.svg",
+        position: { x: 0.08, y: 0.05 },
+        size: { width: 1, height: 1 },
+        centered: true,
+        maxWidth: "30px",
+        zIndex: 99,
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/Download.svg",
+              duration: 1500,
+            },
+          },
+          {
+            type: "download",
+            data: {
+              url: "/dow/scene-1.jpg",
+              fileName: "scene-1",
+            },
+          },
+        ],
+      },
     ],
   },
   {
@@ -103,6 +128,31 @@ export const storiesData: Story[] = [
         zIndex: 2, // СЗАДИ (за окном, но перед небом)
         customClass: "nightEffect",
       },
+      {
+        id: "dow",
+        gifUrl: "/images/Download.svg",
+        position: { x: 0.08, y: 0.05 },
+        size: { width: 1, height: 1 },
+        centered: true,
+        maxWidth: "30px",
+        zIndex: 99,
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/Download.svg",
+              duration: 1500,
+            },
+          },
+          {
+            type: "download",
+            data: {
+              url: "/dow/scene-2.jpg",
+              fileName: "scene-2",
+            },
+          },
+        ],
+      },
     ],
   },
   {
@@ -133,6 +183,31 @@ export const storiesData: Story[] = [
             type: "sound",
             data: {
               soundUrl: "/audio/effects/flowers-sound.mp3",
+            },
+          },
+        ],
+      },
+      {
+        id: "dow",
+        gifUrl: "/images/Download.svg",
+        position: { x: 0.08, y: 0.05 },
+        size: { width: 1, height: 1 },
+        centered: true,
+        maxWidth: "30px",
+        zIndex: 99,
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/Download.svg",
+              duration: 1500,
+            },
+          },
+          {
+            type: "download",
+            data: {
+              url: "/dow/scene-3.jpg",
+              fileName: "scene-3",
             },
           },
         ],
@@ -191,6 +266,31 @@ export const storiesData: Story[] = [
           //     soundUrl: "/audio/effects/flowers-sound.mp3",
           //   },
           // },
+        ],
+      },
+      {
+        id: "dow",
+        gifUrl: "/images/Download.svg",
+        position: { x: 0.08, y: 0.05 },
+        size: { width: 1, height: 1 },
+        centered: true,
+        maxWidth: "30px",
+        zIndex: 99,
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/Download.svg",
+              duration: 1500,
+            },
+          },
+          {
+            type: "download",
+            data: {
+              url: "/dow/scene-4.jpg",
+              fileName: "scene-4",
+            },
+          },
         ],
       },
     ],
@@ -267,6 +367,31 @@ export const storiesData: Story[] = [
           },
         ],
       },
+      {
+        id: "dow",
+        gifUrl: "/images/Download.svg",
+        position: { x: 0.08, y: 0.05 },
+        size: { width: 1, height: 1 },
+        centered: true,
+        maxWidth: "30px",
+        zIndex: 99,
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/Download.svg",
+              duration: 1500,
+            },
+          },
+          {
+            type: "download",
+            data: {
+              url: "/dow/scene-5.jpg",
+              fileName: "scene-5",
+            },
+          },
+        ],
+      },
     ],
   },
 
@@ -297,6 +422,31 @@ export const storiesData: Story[] = [
             type: "sound",
             data: {
               soundUrl: "/audio/effects/grass-sound.mp3",
+            },
+          },
+        ],
+      },
+      {
+        id: "dow",
+        gifUrl: "/images/Download.svg",
+        position: { x: 0.08, y: 0.05 },
+        size: { width: 1, height: 1 },
+        centered: true,
+        maxWidth: "30px",
+        zIndex: 99,
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/Download.svg",
+              duration: 1500,
+            },
+          },
+          {
+            type: "download",
+            data: {
+              url: "/dow/scene-6.jpg",
+              fileName: "scene-6",
             },
           },
         ],
@@ -353,6 +503,31 @@ export const storiesData: Story[] = [
           //     soundUrl: "/audio/effects/leaves-sound.mp3",
           //   },
           // },
+        ],
+      },
+      {
+        id: "dow",
+        gifUrl: "/images/Download.svg",
+        position: { x: 0.08, y: 0.05 },
+        size: { width: 1, height: 1 },
+        centered: true,
+        maxWidth: "30px",
+        zIndex: 99,
+        interaction: [
+          {
+            type: "replace",
+            data: {
+              replacementGif: "/images/Download.svg",
+              duration: 1500,
+            },
+          },
+          {
+            type: "download",
+            data: {
+              url: "/dow/scene-7.jpg",
+              fileName: "scene-7",
+            },
+          },
         ],
       },
     ],

@@ -25,11 +25,11 @@ export interface InteractiveObject {
   // Добавил | "link" в оба места (для одиночного объекта и для массива)
   interaction?:
     | {
-        type: "sound" | "navigate" | "replace" | "link"
+        type: "sound" | "navigate" | "replace" | "link" | "download"
         data: any
       }
     | Array<{
-        type: "sound" | "navigate" | "replace" | "link"
+        type: "sound" | "navigate" | "replace" | "link" | "download"
         data: any
       }>
   zIndex?: number
