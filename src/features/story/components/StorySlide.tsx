@@ -20,6 +20,7 @@ export const StorySlide: React.FC = () => {
   const [sequenceIndex, setSequenceIndex] = useState(-1)
   const [isSequenceActive, setIsSequenceActive] = useState(false)
   const [direction, setDirection] = useState(1)
+  const [isVideoSpedUp, setIsVideoSpedUp] = useState(false)
 
   const isVideo = (url: string | undefined) => {
     if (!url) return false
@@ -32,6 +33,7 @@ export const StorySlide: React.FC = () => {
     setSequenceIndex(-1)
     setIsSequenceActive(false)
     setDirection(1)
+    setIsVideoSpedUp(false)
 
     if (!currentStory) return
 
@@ -70,6 +72,7 @@ export const StorySlide: React.FC = () => {
       if (prevVideo && prevVideo.parentNode) {
         prevVideo.parentNode.removeChild(prevVideo)
         prevVideo.pause()
+        prevVideo.playbackRate = 1
       }
     }
 
@@ -83,6 +86,7 @@ export const StorySlide: React.FC = () => {
       if (cachedVideo) {
         cachedVideo.className = `${styles.background} ${fadeIn ? styles.fadeIn : styles.fadeOut}`
         cachedVideo.style.height = currentStory.backgroundHeight || "100%"
+        cachedVideo.playbackRate = 1
 
         if (cachedVideo.parentNode !== container) {
           container.innerHTML = ""
@@ -118,6 +122,20 @@ export const StorySlide: React.FC = () => {
   const handleContainerClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement
     if (target.tagName === "IMG" && target.closest('[data-layer="objects"]')) return
+
+    if (currentStory.videoSpeedOnClick && isVideo(currentStory.backgroundImage)) {
+      const video = getVideoElement(currentStory.backgroundImage!)
+      if (video) {
+        if (isVideoSpedUp) {
+          video.playbackRate = 1
+          setIsVideoSpedUp(false)
+        } else {
+          video.playbackRate = currentStory.videoSpeedOnClick
+          setIsVideoSpedUp(true)
+        }
+      }
+      return
+    }
 
     if (currentStory.backgroundSequence && currentStory.backgroundSequence.length > 0) {
       const len = currentStory.backgroundSequence.length

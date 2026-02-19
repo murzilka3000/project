@@ -50,6 +50,7 @@ export interface Story {
   sequenceInterval?: number
   isBackgroundBottom?: boolean
   backgroundHeight?: string
+  videoSpeedOnClick?: number
 }
 
 export interface StoryState {

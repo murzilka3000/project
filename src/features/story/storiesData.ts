@@ -147,6 +147,7 @@ export const storiesData: Story[] = [
     audioTrack: "/audio/background-4.mp3",
     isBackgroundBottom: true,
     backgroundHeight: "70%",
+    videoSpeedOnClick: 3,
     objects: [
       {
         id: "book",
@@ -203,7 +204,7 @@ export const storiesData: Story[] = [
       {
         id: "table",
         gifUrl: "/images/story5/table-1.png",
-        position: { x: 0.34, y: 0.21 },
+        position: { x: 0.34, y: 0.22 },
         size: { width: 0.67, height: 0.17 },
         zIndex: 99,
         interaction: [
