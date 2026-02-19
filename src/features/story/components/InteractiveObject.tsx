@@ -131,22 +131,41 @@ export const InteractiveObject: React.FC<Props> = ({ object, isBackgroundToggled
   const position = isMobile && object.mobilePosition ? object.mobilePosition : object.position
   const size = isMobile && object.mobileSize ? object.mobileSize : object.size
 
-  const dynamicStyles: React.CSSProperties = {
-    position: "absolute",
-    left: `${position.x * 100}%`,
-    top: `${position.y * 100}%`,
-    width: `${size.width * 100}%`,
-    height: `${size.height * 100}%`,
-    zIndex: object.zIndex || 1,
-    cursor: "pointer",
-  }
+  let dynamicStyles: React.CSSProperties = {}
 
-  if (object.centered) {
-    dynamicStyles.transform = "translate(-50%, -50%)"
-  }
+  if (object.id === "dow") {
+    dynamicStyles = {
+      position: "absolute",
+      top: "40px",
+      left: "40px",
+      width: "50px",
+      height: "50px",
+      padding: "10px",
+      zIndex: object.zIndex || 99,
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      pointerEvents: "auto",
+    }
+  } else {
+    dynamicStyles = {
+      position: "absolute",
+      left: `${position.x * 100}%`,
+      top: `${position.y * 100}%`,
+      width: `${size.width * 100}%`,
+      height: `${size.height * 100}%`,
+      zIndex: object.zIndex || 1,
+      cursor: "pointer",
+    }
 
-  if (object.maxWidth) {
-    dynamicStyles.maxWidth = object.maxWidth
+    if (object.centered) {
+      dynamicStyles.transform = "translate(-50%, -50%)"
+    }
+
+    if (object.maxWidth) {
+      dynamicStyles.maxWidth = object.maxWidth
+    }
   }
 
   const containerClasses = [
@@ -160,14 +179,7 @@ export const InteractiveObject: React.FC<Props> = ({ object, isBackgroundToggled
 
   return (
     <div className={containerClasses} style={dynamicStyles} onClick={handleClick}>
-      <img
-        src={currentGif}
-        alt=""
-        className={styles.gif}
-        draggable={false}
-        decoding="async"
-        style={object.maxWidth ? { width: "100%", height: "100%", objectFit: "contain" } : { width: "100%", height: "100%" }}
-      />
+      <img src={currentGif} alt="" className={styles.gif} draggable={false} decoding="async" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
     </div>
   )
 }
