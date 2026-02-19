@@ -10,6 +10,7 @@ export const StorySlide: React.FC = () => {
   const { stories, currentStoryIndex } = useSelector((state: RootState) => state.story)
   const currentStory = stories[currentStoryIndex]
   const videoContainerRef = useRef<HTMLDivElement>(null)
+  const prevStoryIdRef = useRef<number | null>(null)
 
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageDimensions, setImageDimensions] = useState({ width: 1920, height: 1080 })
@@ -60,20 +61,38 @@ export const StorySlide: React.FC = () => {
 
   useEffect(() => {
     const container = videoContainerRef.current
-    if (!container) return
+
+    const prevStoryId = prevStoryIdRef.current
+    const prevStory = prevStoryId !== null ? stories.find((s) => s.id === prevStoryId) : null
+
+    if (prevStory && isVideo(prevStory.backgroundImage)) {
+      const prevVideo = getVideoElement(prevStory.backgroundImage!)
+      if (prevVideo && prevVideo.parentNode) {
+        prevVideo.parentNode.removeChild(prevVideo)
+        prevVideo.pause()
+      }
+    }
+
+    prevStoryIdRef.current = currentStory?.id ?? null
+
+    if (!container || !currentStory) return
 
     if (isVideo(currentStory.backgroundImage)) {
-      container.innerHTML = ""
       const cachedVideo = getVideoElement(currentStory.backgroundImage!)
 
       if (cachedVideo) {
         cachedVideo.className = `${styles.background} ${fadeIn ? styles.fadeIn : styles.fadeOut}`
         cachedVideo.style.height = currentStory.backgroundHeight || "100%"
-        container.appendChild(cachedVideo)
+
+        if (cachedVideo.parentNode !== container) {
+          container.innerHTML = ""
+          container.appendChild(cachedVideo)
+        }
+
         cachedVideo.play().catch(() => {})
       }
     }
-  }, [currentStory?.backgroundImage, fadeIn, currentStory?.backgroundHeight])
+  }, [currentStory?.id, fadeIn, currentStory?.backgroundHeight, stories])
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout
