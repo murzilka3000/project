@@ -22,6 +22,7 @@ export const storiesData: Story[] = [
         gifUrl: "/images/story1/plant.png",
         position: { x: 0.68, y: 0.3 },
         size: { width: 0.2, height: 0.17 },
+        zIndex: 99,
         interaction: [
           {
             type: "replace",
