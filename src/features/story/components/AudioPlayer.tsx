@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { RootState } from "@/app/store"
-import { setAudioPlaying } from "../storySlice"
+import { setAudioPlaying, nextStory } from "../storySlice"
 
 const FADE_DURATION = 500
 
@@ -14,7 +14,6 @@ export const AudioPlayer: React.FC = () => {
 
   const currentStory = stories[currentStoryIndex]
 
-  // Функция плавного затухания
   const fadeOut = (audio: HTMLAudioElement): Promise<void> => {
     return new Promise((resolve) => {
       const startVolume = audio.volume
@@ -43,7 +42,6 @@ export const AudioPlayer: React.FC = () => {
     })
   }
 
-  // Функция плавного появления
   const fadeIn = (audio: HTMLAudioElement, targetVolume: number = 1): Promise<void> => {
     return new Promise((resolve) => {
       audio.volume = 0
@@ -76,20 +74,16 @@ export const AudioPlayer: React.FC = () => {
     })
   }
 
-  // Автоматическое воспроизведение с fade при смене истории
   useEffect(() => {
     const playNewTrack = async () => {
       if (!audioRef.current) return
 
-      // Если играет другой трек, затухаем его
       if (isAudioPlaying && !audioRef.current.paused) {
         await fadeOut(audioRef.current)
       }
 
-      // Загружаем новый трек
       audioRef.current.load()
 
-      // Ждем, пока аудио будет готово к воспроизведению
       await new Promise<void>((resolve) => {
         if (!audioRef.current) {
           resolve()
@@ -103,7 +97,6 @@ export const AudioPlayer: React.FC = () => {
         audioRef.current.addEventListener("canplaythrough", handleCanPlay, { once: true })
       })
 
-      // Запускаем с fade in
       try {
         await fadeIn(audioRef.current, 1)
         dispatch(setAudioPlaying(true))
@@ -115,7 +108,6 @@ export const AudioPlayer: React.FC = () => {
 
     playNewTrack()
 
-    // Очистка при размонтировании
     return () => {
       if (fadeIntervalRef.current) {
         clearInterval(fadeIntervalRef.current)
@@ -123,7 +115,6 @@ export const AudioPlayer: React.FC = () => {
     }
   }, [currentStoryIndex, dispatch])
 
-  // Управление паузой/воспроизведением
   useEffect(() => {
     if (!audioRef.current) return
 
@@ -134,5 +125,22 @@ export const AudioPlayer: React.FC = () => {
     }
   }, [isAudioPlaying])
 
-  return <audio ref={audioRef} src={currentStory.audioTrack} loop preload="auto" />
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const handleEnded = () => {
+      if (currentStoryIndex < stories.length - 1) {
+        dispatch(nextStory())
+      }
+    }
+
+    audio.addEventListener("ended", handleEnded)
+
+    return () => {
+      audio.removeEventListener("ended", handleEnded)
+    }
+  }, [currentStoryIndex, stories.length, dispatch])
+
+  return <audio ref={audioRef} src={currentStory.audioTrack} preload="auto" />
 }
