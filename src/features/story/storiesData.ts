@@ -4,7 +4,7 @@ export const storiesData: Story[] = [
   {
     id: 1,
     title: "Akiaura Story Ch. 1",
-    backgroundImage: "/images/story1/background.png",
+    backgroundImage: "/images/story1/background.webp",
     audioTrack: "/audio/background-1.wav",
     description: "",
     objects: [
@@ -197,7 +197,7 @@ export const storiesData: Story[] = [
   {
     id: 5,
     title: "",
-    backgroundImage: "/images/story5/back.png",
+    backgroundImage: "/images/story5/back.webp",
     audioTrack: "/audio/effects/go.mp3",
     objects: [
       {
