@@ -49,6 +49,7 @@ export interface Story {
   backgroundSequence?: string[]
   sequenceInterval?: number
   isBackgroundBottom?: boolean
+  backgroundHeight?: string
 }
 
 export interface StoryState {

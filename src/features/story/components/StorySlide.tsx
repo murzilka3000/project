@@ -68,11 +68,12 @@ export const StorySlide: React.FC = () => {
 
       if (cachedVideo) {
         cachedVideo.className = `${styles.background} ${fadeIn ? styles.fadeIn : styles.fadeOut}`
+        cachedVideo.style.height = currentStory.backgroundHeight || "100%"
         container.appendChild(cachedVideo)
         cachedVideo.play().catch(() => {})
       }
     }
-  }, [currentStory?.backgroundImage, fadeIn])
+  }, [currentStory?.backgroundImage, fadeIn, currentStory?.backgroundHeight])
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout
@@ -128,15 +129,20 @@ export const StorySlide: React.FC = () => {
   const activeBaseLayer = isLayerToggled && currentStory.toggleBaseLayer ? currentStory.toggleBaseLayer : currentStory.baseLayer
 
   const renderMainBackground = (zIndex: number) => {
+    const heightStyle = currentStory.backgroundHeight || "100%"
+
     if (isVideo(currentStory.backgroundImage)) {
       return <div ref={videoContainerRef} style={{ zIndex, position: "absolute", width: "100%", height: "100%", top: 0, left: 0 }} />
     }
 
     const content =
       currentStory.backgroundEffect === "pan-x" ? (
-        <div className={`${styles.animatedBackground} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} style={{ backgroundImage: `url(${currentStory.backgroundImage})` }} />
+        <div
+          className={`${styles.animatedBackground} ${fadeIn ? styles.fadeIn : styles.fadeOut}`}
+          style={{ backgroundImage: `url(${currentStory.backgroundImage})`, height: heightStyle }}
+        />
       ) : (
-        <img src={currentStory.backgroundImage} alt="" className={`${styles.background} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} />
+        <img src={currentStory.backgroundImage} alt="" className={`${styles.background} ${fadeIn ? styles.fadeIn : styles.fadeOut}`} style={{ height: heightStyle }} />
       )
 
     return <div style={{ zIndex, position: "absolute", width: "100%", height: "100%", top: 0, left: 0 }}>{content}</div>

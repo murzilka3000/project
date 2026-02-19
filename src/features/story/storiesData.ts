@@ -66,11 +66,9 @@ export const storiesData: Story[] = [
   {
     id: 2,
     title: "",
-    //backgroundImage — это теперь то, что ПЕРЕД птицей (Окно)
     backgroundImage: "/images/story2/window.png",
     audioTrack: "/audio/background-2.mp3",
     description: "",
-    //baseLayer — это теперь то, что ЗА птицей (Небо)
     baseLayer: "/images/story2/sky.png",
     objects: [
       {
@@ -115,6 +113,7 @@ export const storiesData: Story[] = [
     baseLayer: "/images/story3/no-sky.png",
     toggleBaseLayer: "/images/story3/nosky-2.png",
     isBackgroundBottom: true,
+    backgroundHeight: "50%",
     objects: [
       {
         id: "catw",
@@ -147,6 +146,7 @@ export const storiesData: Story[] = [
     baseLayer: "/images/story4/back4.png ",
     audioTrack: "/audio/background-4.mp3",
     isBackgroundBottom: true,
+    backgroundHeight: "70%",
     objects: [
       {
         id: "book",
@@ -276,6 +276,7 @@ export const storiesData: Story[] = [
     baseLayer: "/images/story6/bg.png ",
     audioTrack: "/audio/still.mp3",
     isBackgroundBottom: true,
+    backgroundHeight: "65%",
     objects: [
       {
         id: "grass",
