@@ -305,9 +305,9 @@ export const storiesData: Story[] = [
   {
     id: 7,
     title: "",
-    backgroundImage: "/images/story7/bg1.jpg",
+    backgroundImage: "/images/story7/bg1.webp",
     audioTrack: "/audio/while.mp3",
-    backgroundSequence: ["/images/story7/bg1.jpg", "/images/story7/bg2.jpg", "/images/story7/bg4.jpg"],
+    backgroundSequence: ["/images/story7/bg1.webp", "/images/story7/bg2.webp", "/images/story7/bg4.webp"],
     objects: [
       {
         id: "tree",
