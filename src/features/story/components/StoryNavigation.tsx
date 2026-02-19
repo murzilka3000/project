@@ -14,8 +14,12 @@ export const StoryNavigation: React.FC = () => {
 
   if (isLast) return null
 
+  const handleNavClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+  }
+
   return (
-    <div className={styles.navigation}>
+    <div className={styles.navigation} onClick={handleNavClick}>
       <AudioToggle />
 
       {!isFirst && (

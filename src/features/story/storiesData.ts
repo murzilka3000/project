@@ -319,7 +319,7 @@ export const storiesData: Story[] = [
           {
             type: "sound",
             data: {
-              soundUrl: "/audio/effects/table-sound.mp3",
+              soundUrl: "/audio/effects/table-sound.wav",
             },
           },
         ],
