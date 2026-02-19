@@ -25,10 +25,8 @@ export const StorySlide: React.FC = () => {
     return /\.(mp4|webm)$/i.test(url)
   }
 
-  // ЭФФЕКТ: Мгновенная инициализация слайда (так как всё в кэше)
   useEffect(() => {
-    // 1. Сброс всех состояний предыдущего слайда
-    setImageLoaded(false)
+    // 1. Сброс состояний интерактива
     setFadeIn(false)
     setIsLayerToggled(false)
     setSequenceIndex(-1)
@@ -37,25 +35,24 @@ export const StorySlide: React.FC = () => {
 
     if (!currentStory) return
 
-    // 2. Получаем размеры фона (для aspectRatio)
-    // Мы берем либо baseLayer, либо backgroundImage
-    const bgIsVideo = isVideo(currentStory.backgroundImage)
-    const src = bgIsVideo ? currentStory.baseLayer : currentStory.backgroundImage
+    // 2. Вместо ожидания onload, сразу проверяем размеры (они нужны для aspectRatio)
+    const src = isVideo(currentStory.backgroundImage) ? currentStory.baseLayer : currentStory.backgroundImage
 
     if (src) {
       const img = new Image()
       img.src = src
-      // Так как картинка уже в кэше (после StartScreen), onload сработает почти мгновенно
-      img.onload = () => {
+
+      const updateImage = () => {
         setImageDimensions({ width: img.width, height: img.height })
-        setImageLoaded(true)
-        // Маленькая задержка для запуска CSS fadeIn анимации
+        setImageLoaded(true) // Теперь это произойдет мгновенно для кэшированных
         requestAnimationFrame(() => setFadeIn(true))
       }
-      // Если по какой-то причине ошибка, все равно показываем слайд
-      img.onerror = () => {
-        setImageLoaded(true)
-        setFadeIn(true)
+
+      if (img.complete) {
+        updateImage()
+      } else {
+        img.onload = updateImage
+        img.onerror = updateImage
       }
     } else {
       setImageLoaded(true)

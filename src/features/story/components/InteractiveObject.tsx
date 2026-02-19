@@ -5,7 +5,7 @@ import { InteractiveObject as IInteractiveObject } from "../types"
 import { markObjectInteraction } from "../storySlice"
 import styles from "./InteractiveObject.module.scss"
 
-// Описываем интерфейс данных
+
 interface InteractionData {
   soundUrl?: string
   replacementGif?: string

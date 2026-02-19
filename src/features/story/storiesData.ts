@@ -42,7 +42,7 @@ export const storiesData: Story[] = [
         id: "lamp",
         zIndex: 99,
         gifUrl: "/images/story1/lamp.png",
-        position: { x: 0.26, y: 0.6 },
+        position: { x: 0.26, y: 0.61 },
         size: { width: 0.2, height: 0.14 },
         interaction: [
           {

@@ -11,48 +11,77 @@ export const StartScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
 
   useEffect(() => {
     const loadAllAssets = async () => {
-      // 1. Собираем все уникальные ссылки на ресурсы
-      const images: string[] = []
-      const videos: string[] = []
+      const criticalImages: string[] = []
+      const criticalVideos: string[] = []
+      const backgroundImages: string[] = []
+      const backgroundVideos: string[] = []
 
-      stories.forEach((story) => {
-        const isVid = (url: string) => /\.(mp4|webm)$/i.test(url)
+      const isVid = (url: string) => /\.(mp4|webm)$/i.test(url)
 
+      const collectAssets = (story: (typeof stories)[0], imgArray: string[], vidArray: string[]) => {
         if (story.backgroundImage) {
-          isVid(story.backgroundImage) ? videos.push(story.backgroundImage) : images.push(story.backgroundImage)
+          if (isVid(story.backgroundImage)) {
+            vidArray.push(story.backgroundImage)
+          } else {
+            imgArray.push(story.backgroundImage)
+          }
         }
-        if (story.baseLayer) images.push(story.baseLayer)
-        if (story.toggleBaseLayer) images.push(story.toggleBaseLayer)
-        if (story.backgroundSequence) images.push(...story.backgroundSequence)
+        if (story.baseLayer) imgArray.push(story.baseLayer)
+        if (story.toggleBaseLayer) imgArray.push(story.toggleBaseLayer)
+        if (story.backgroundSequence) imgArray.push(...story.backgroundSequence)
 
         story.objects.forEach((obj) => {
-          images.push(obj.gifUrl)
+          if (obj.gifUrl) imgArray.push(obj.gifUrl)
           if (obj.interaction) {
-            const ints = Array.isArray(obj.interaction) ? obj.interaction : [obj.interaction]
-            ints.forEach((i) => {
-              if (i.data.replacementGif) images.push(i.data.replacementGif)
+            const interactions = Array.isArray(obj.interaction) ? obj.interaction : [obj.interaction]
+            interactions.forEach((int) => {
+              if (int.data?.replacementGif) imgArray.push(int.data.replacementGif)
             })
           }
         })
+      }
+
+      // 1. Распределяем ресурсы: первые 2 слайда - критические, остальные - фон
+      stories.forEach((story, index) => {
+        if (index < 2) {
+          collectAssets(story, criticalImages, criticalVideos)
+        } else {
+          collectAssets(story, backgroundImages, backgroundVideos)
+        }
       })
 
-      const uniqueImages = Array.from(new Set(images))
-      const uniqueVideos = Array.from(new Set(videos))
-      const total = uniqueImages.length + uniqueVideos.length
+      const uniqueCritImages = Array.from(new Set(criticalImages))
+      const uniqueCritVideos = Array.from(new Set(criticalVideos))
+      const totalCritical = uniqueCritImages.length + uniqueCritVideos.length
       let loadedCount = 0
 
       const updateProgress = () => {
         loadedCount++
-        setProgress(Math.round((loadedCount / total) * 100))
+        if (totalCritical > 0) {
+          setProgress(Math.round((loadedCount / totalCritical) * 100))
+        }
       }
 
-      // 2. Запускаем загрузку
-      // Сначала грузим первые 2 слайда (приоритет), потом остальные
-      const imagePromises = uniqueImages.map((src) => preloadImage(src).then(updateProgress))
-      const videoPromises = uniqueVideos.map((src) => preloadVideo(src).then(updateProgress))
+      // 2. Загружаем критические ресурсы
+      if (totalCritical === 0) {
+        setIsLoaded(true)
+      } else {
+        const imagePromises = uniqueCritImages.map((src) => preloadImage(src).then(updateProgress))
+        const videoPromises = uniqueCritVideos.map((src) => preloadVideo(src).then(updateProgress))
+        await Promise.all([...imagePromises, ...videoPromises])
+        setIsLoaded(true)
+      }
 
-      await Promise.all([...imagePromises, ...videoPromises])
-      setIsLoaded(true)
+      // 3. Загружаем всё остальное в фоне
+      const uniqueBackImages = Array.from(new Set(backgroundImages))
+      const uniqueBackVideos = Array.from(new Set(backgroundVideos))
+
+      uniqueBackImages.forEach((src) => {
+        preloadImage(src).catch((err) => console.warn("Background image failed:", err))
+      })
+      uniqueBackVideos.forEach((src) => {
+        preloadVideo(src).catch((err) => console.warn("Background video failed:", err))
+      })
     }
 
     loadAllAssets()
