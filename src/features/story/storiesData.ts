@@ -499,12 +499,12 @@ export const storiesData: Story[] = [
               duration: 1500,
             },
           },
-          // {
-          //   type: "sound",
-          //   data: {
-          //     soundUrl: "/audio/effects/leaves-sound.mp3",
-          //   },
-          // },
+          {
+            type: "sound",
+            data: {
+              soundUrl: "/audio/effects/star-sound.mp3",
+            },
+          },
         ],
       },
       {
@@ -562,6 +562,12 @@ export const storiesData: Story[] = [
             data: {
               url: "https://bfan.link/places-we-ll-go", // Ваша ссылка
               target: "_blank",
+            },
+          },
+          {
+            type: "sound",
+            data: {
+              soundUrl: "/audio/effects/red-sound.wav",
             },
           },
         ],

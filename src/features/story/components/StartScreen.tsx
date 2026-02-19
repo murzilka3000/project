@@ -12,14 +12,12 @@ export const StartScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
 
   useEffect(() => {
     let currentProgress = 0
-    const MIN_LOADING_TIME = 2000 // 3 секунды минимум
+    const MIN_LOADING_TIME = 2000
     const startTime = Date.now()
 
-    // Таймер для искусственного прогресса
     const interval = setInterval(() => {
       currentProgress += 1
 
-      // Замедляем полоску на 90%, если реальные ассеты еще не докачались
       if (currentProgress >= 90 && !realAssetsLoaded) {
         currentProgress = 90
       }
@@ -31,8 +29,6 @@ export const StartScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
       if (currentProgress >= 100 && realAssetsLoaded) {
         const endTime = Date.now()
         const diff = endTime - startTime
-
-        // Если все загрузилось быстрее 3 секунд, ждем остаток времени
         const delay = Math.max(0, MIN_LOADING_TIME - diff)
 
         setTimeout(() => {
@@ -40,7 +36,7 @@ export const StartScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
           clearInterval(interval)
         }, delay)
       }
-    }, 30) // Скорость шага анимации
+    }, 30)
 
     const loadAllAssets = async () => {
       const criticalImages: string[] = []
@@ -81,13 +77,10 @@ export const StartScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
       const uniqueCritImages = Array.from(new Set(criticalImages))
       const uniqueCritVideos = Array.from(new Set(criticalVideos))
 
-      // Загружаем только критические для старта
       await Promise.all([...uniqueCritImages.map(preloadImage), ...uniqueCritVideos.map(preloadVideo)])
 
-      // Сигнализируем, что реальные файлы готовы
       setRealAssetsLoaded(true)
 
-      // Фоновая загрузка остальных (не блокирует прогресс)
       const uniqueBackImages = Array.from(new Set(backgroundImages))
       const uniqueBackVideos = Array.from(new Set(backgroundVideos))
       uniqueBackImages.forEach(preloadImage)
@@ -98,6 +91,12 @@ export const StartScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
 
     return () => clearInterval(interval)
   }, [stories, realAssetsLoaded])
+
+  const handleStartClick = () => {
+    const audio = new Audio("/audio/effects/button-sound.mp3")
+    audio.play().catch(() => {})
+    onStart()
+  }
 
   const maxWidth = 256.9
   const currentWidth = (maxWidth * progress) / 100
@@ -121,8 +120,8 @@ export const StartScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
               <p className={styles.loadingText}>loading assets {progress}%</p>
             </div>
           ) : (
-            <button className={styles.startButton} onClick={onStart}>
-              <img src="/Button.svg" alt="Start" />
+            <button className={styles.startButton} onClick={handleStartClick}>
+              <img src="/Button.svg" alt="Start" draggable={false} />
             </button>
           )}
         </div>
