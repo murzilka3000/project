@@ -53,6 +53,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      max-width: 214px;
     }
 
     // Стили для состояния загрузки
@@ -74,6 +75,7 @@
         opacity: 0.8;
         animation: pulse 1.5s infinite;
         margin: 0;
+        margin-top: 15px;
       }
     }
 

@@ -8,8 +8,40 @@ export const StartScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
   const { stories } = useSelector((state: RootState) => state.story)
   const [progress, setProgress] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [realAssetsLoaded, setRealAssetsLoaded] = useState(false)
 
   useEffect(() => {
+    let currentProgress = 0
+    const MIN_LOADING_TIME = 2000 // 3 секунды минимум
+    const startTime = Date.now()
+
+    // Таймер для искусственного прогресса
+    const interval = setInterval(() => {
+      currentProgress += 1
+
+      // Замедляем полоску на 90%, если реальные ассеты еще не докачались
+      if (currentProgress >= 90 && !realAssetsLoaded) {
+        currentProgress = 90
+      }
+
+      if (currentProgress <= 100) {
+        setProgress(currentProgress)
+      }
+
+      if (currentProgress >= 100 && realAssetsLoaded) {
+        const endTime = Date.now()
+        const diff = endTime - startTime
+
+        // Если все загрузилось быстрее 3 секунд, ждем остаток времени
+        const delay = Math.max(0, MIN_LOADING_TIME - diff)
+
+        setTimeout(() => {
+          setIsLoaded(true)
+          clearInterval(interval)
+        }, delay)
+      }
+    }, 30) // Скорость шага анимации
+
     const loadAllAssets = async () => {
       const criticalImages: string[] = []
       const criticalVideos: string[] = []
@@ -41,51 +73,31 @@ export const StartScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
         })
       }
 
-      // 1. Распределяем ресурсы: первые 2 слайда - критические, остальные - фон
       stories.forEach((story, index) => {
-        if (index < 2) {
-          collectAssets(story, criticalImages, criticalVideos)
-        } else {
-          collectAssets(story, backgroundImages, backgroundVideos)
-        }
+        if (index < 2) collectAssets(story, criticalImages, criticalVideos)
+        else collectAssets(story, backgroundImages, backgroundVideos)
       })
 
       const uniqueCritImages = Array.from(new Set(criticalImages))
       const uniqueCritVideos = Array.from(new Set(criticalVideos))
-      const totalCritical = uniqueCritImages.length + uniqueCritVideos.length
-      let loadedCount = 0
 
-      const updateProgress = () => {
-        loadedCount++
-        if (totalCritical > 0) {
-          setProgress(Math.round((loadedCount / totalCritical) * 100))
-        }
-      }
+      // Загружаем только критические для старта
+      await Promise.all([...uniqueCritImages.map(preloadImage), ...uniqueCritVideos.map(preloadVideo)])
 
-      // 2. Загружаем критические ресурсы
-      if (totalCritical === 0) {
-        setIsLoaded(true)
-      } else {
-        const imagePromises = uniqueCritImages.map((src) => preloadImage(src).then(updateProgress))
-        const videoPromises = uniqueCritVideos.map((src) => preloadVideo(src).then(updateProgress))
-        await Promise.all([...imagePromises, ...videoPromises])
-        setIsLoaded(true)
-      }
+      // Сигнализируем, что реальные файлы готовы
+      setRealAssetsLoaded(true)
 
-      // 3. Загружаем всё остальное в фоне
+      // Фоновая загрузка остальных (не блокирует прогресс)
       const uniqueBackImages = Array.from(new Set(backgroundImages))
       const uniqueBackVideos = Array.from(new Set(backgroundVideos))
-
-      uniqueBackImages.forEach((src) => {
-        preloadImage(src).catch((err) => console.warn("Background image failed:", err))
-      })
-      uniqueBackVideos.forEach((src) => {
-        preloadVideo(src).catch((err) => console.warn("Background video failed:", err))
-      })
+      uniqueBackImages.forEach(preloadImage)
+      uniqueBackVideos.forEach(preloadVideo)
     }
 
     loadAllAssets()
-  }, [stories])
+
+    return () => clearInterval(interval)
+  }, [stories, realAssetsLoaded])
 
   const maxWidth = 256.9
   const currentWidth = (maxWidth * progress) / 100
