@@ -109,7 +109,7 @@ export const storiesData: Story[] = [
       },
       {
         id: "tulle",
-        gifUrl: "/images/story2/tulle.gif",
+        gifUrl: "/images/story2/tulle-1.png",
         position: { x: 0.84, y: 0.5 },
         size: { width: 0.5, height: 1 },
         zIndex: 11, // СПЕРЕДИ (перед окном)
