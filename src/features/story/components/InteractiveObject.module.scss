@@ -78,28 +78,27 @@
 
 @keyframes birdFly {
   0% {
-    // Начинаем Справа (300%) и Сверху (-150%)
-    // scaleX(-1) разворачивает птицу влево
-    transform: translate(300%, -150%) scaleX(-1);
+    /* Начинаем Справа (250%) и Сверху (-120%) */
+    transform: translate(250%, -120%);
     opacity: 0;
   }
 
   15% {
-    opacity: 1; // Быстро проявляется при влете
+    opacity: 1;
   }
 
-  // Плавное движение через центр слайда
   50% {
-    transform: translate(0%, -50%) scaleX(-1);
+    /* Пролет через центр */
+    transform: translate(0, -20%);
   }
 
   85% {
-    opacity: 1; // Все еще видна
+    opacity: 1;
   }
 
   100% {
-    // Улетает Слева (-300%) и Вниз (150%)
-    transform: translate(-300%, 150%) scaleX(-1);
+    /* Улетает Слева (-250%) и Вниз (120%) */
+    transform: translate(-250%, 120%);
     opacity: 0;
   }
 }
