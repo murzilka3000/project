@@ -34,7 +34,7 @@ export const storiesData: Story[] = [
           {
             type: "sound",
             data: {
-              soundUrl: "/audio/effects/grass-rustling.mp3",
+              soundUrl: "/audio/effects/flowers-sound.mp3",
             },
           },
         ],
@@ -183,7 +183,7 @@ export const storiesData: Story[] = [
           {
             type: "sound",
             data: {
-              soundUrl: "/audio/effects/flowers-sound.mp3",
+              soundUrl: "/audio/flowers-sound.mp3",
             },
           },
         ],
@@ -341,7 +341,7 @@ export const storiesData: Story[] = [
           {
             type: "sound",
             data: {
-              soundUrl: "/audio/effects/color-sound.wav",
+              soundUrl: "/audio/effects/grass-sound.mp3",
             },
           },
         ],
