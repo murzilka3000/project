@@ -122,7 +122,7 @@ export const storiesData: Story[] = [
         id: "night-stars",
         gifUrl: "/images/story2/bird.gif",
         position: { x: 0.5, y: 0.35 },
-        size: { width: 0.3, height: 0.2 },
+        size: { width: 0.15, height: 0.2 },
         centered: true,
         noHover: true,
         zIndex: 2, // СЗАДИ (за окном, но перед небом)
