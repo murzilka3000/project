@@ -34,7 +34,7 @@ export const storiesData: Story[] = [
           {
             type: "sound",
             data: {
-              soundUrl: "/audio/effects/flowers-sound.mp3",
+              soundUrl: "/audio/flowers-sound.mp3",
             },
           },
         ],

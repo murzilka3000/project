@@ -126,12 +126,15 @@ export const StorySlide: React.FC = () => {
   }, [sequenceIndex, isSequenceActive, direction, currentStory?.backgroundSequence, currentStory?.sequenceInterval, currentStory?.sequenceSound, isAudioPlaying])
 
   const handleContainerClick = (e: React.MouseEvent) => {
-    if (currentStory.clickSound && isAudioPlaying) {
+    const target = e.target as HTMLElement
+    const isObjectClick = !!target.closest('[data-layer="objects"]')
+
+    if (!isObjectClick && currentStory.clickSound && isAudioPlaying) {
       const audio = new Audio(currentStory.clickSound)
       audio.play().catch(() => {})
     }
 
-    if (currentStory.videoSpeedOnClick && isVideo(currentStory.backgroundImage)) {
+    if (!isObjectClick && currentStory.videoSpeedOnClick && isVideo(currentStory.backgroundImage)) {
       const video = getVideoElement(currentStory.backgroundImage!)
       if (video) {
         if (isVideoSpedUp) {
@@ -145,7 +148,7 @@ export const StorySlide: React.FC = () => {
       return
     }
 
-    if (currentStory.backgroundSequence && currentStory.backgroundSequence.length > 0) {
+    if (!isObjectClick && currentStory.backgroundSequence && currentStory.backgroundSequence.length > 0) {
       const len = currentStory.backgroundSequence.length
       if (sequenceIndex === -1) {
         setSequenceIndex(0)
@@ -167,7 +170,9 @@ export const StorySlide: React.FC = () => {
     const hasCustomAnimation = currentStory.objects.some((obj) => obj.customClass)
 
     if (currentStory.toggleBaseLayer) {
-      setIsLayerToggled((prev) => !prev)
+      if (!isObjectClick) {
+        setIsLayerToggled((prev) => !prev)
+      }
     } else if (hasCustomAnimation) {
       if (isLayerToggled) return
       setIsLayerToggled(true)

@@ -116,7 +116,6 @@ export const InteractiveObject: React.FC<Props> = ({ object, isBackgroundToggled
   }
 
   const handleClick = () => {
-    //e.stopPropagation()
     dispatch(markObjectInteraction(object.id))
 
     if (!object.interaction) return
