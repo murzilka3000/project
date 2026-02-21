@@ -11,6 +11,7 @@ export const StorySlide: React.FC = () => {
   const currentStory = stories[currentStoryIndex]
   const videoContainerRef = useRef<HTMLDivElement>(null)
   const prevStoryIdRef = useRef<number | null>(null)
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageDimensions, setImageDimensions] = useState({ width: 1920, height: 1080 })
@@ -34,6 +35,10 @@ export const StorySlide: React.FC = () => {
     setIsSequenceActive(false)
     setDirection(1)
     setIsVideoSpedUp(false)
+
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current)
+    }
 
     if (!currentStory) return
 
@@ -120,12 +125,7 @@ export const StorySlide: React.FC = () => {
     return () => clearTimeout(timeoutId)
   }, [sequenceIndex, isSequenceActive, direction, currentStory?.backgroundSequence, currentStory?.sequenceInterval, currentStory?.sequenceSound, isAudioPlaying])
 
-  if (!currentStory) return <div className={styles.loading}>Loading story...</div>
-
   const handleContainerClick = (e: React.MouseEvent) => {
-    const target = e.target as HTMLElement
-    if (target.tagName === "IMG" && target.closest('[data-layer="objects"]')) return
-
     if (currentStory.clickSound && isAudioPlaying) {
       const audio = new Audio(currentStory.clickSound)
       audio.play().catch(() => {})
@@ -165,8 +165,16 @@ export const StorySlide: React.FC = () => {
     }
 
     const hasCustomAnimation = currentStory.objects.some((obj) => obj.customClass)
-    if (currentStory.toggleBaseLayer || hasCustomAnimation) {
+
+    if (currentStory.toggleBaseLayer) {
       setIsLayerToggled((prev) => !prev)
+    } else if (hasCustomAnimation) {
+      if (isLayerToggled) return
+      setIsLayerToggled(true)
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current)
+      animationTimeoutRef.current = setTimeout(() => {
+        setIsLayerToggled(false)
+      }, 5000)
     }
   }
 
