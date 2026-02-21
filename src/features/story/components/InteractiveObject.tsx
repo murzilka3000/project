@@ -139,8 +139,8 @@ export const InteractiveObject: React.FC<Props> = ({ object, isBackgroundToggled
   if (object.id === "dow") {
     dynamicStyles = {
       position: "absolute",
-      top: "15px",
-      right: "15px",
+      top: "40px",
+      left: "40px",
       width: "50px",
       height: "50px",
       padding: "10px",
