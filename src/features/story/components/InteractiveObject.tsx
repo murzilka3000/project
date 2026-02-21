@@ -115,7 +115,11 @@ export const InteractiveObject: React.FC<Props> = ({ object, isBackgroundToggled
     }
   }
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    if (object.id === "cat") {
+      e.stopPropagation()
+    }
+
     dispatch(markObjectInteraction(object.id))
 
     if (!object.interaction) return
@@ -135,8 +139,8 @@ export const InteractiveObject: React.FC<Props> = ({ object, isBackgroundToggled
   if (object.id === "dow") {
     dynamicStyles = {
       position: "absolute",
-      top: "40px",
-      left: "40px",
+      top: "15px",
+      right: "15px",
       width: "50px",
       height: "50px",
       padding: "10px",
