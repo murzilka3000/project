@@ -474,7 +474,7 @@ export const storiesData: Story[] = [
             type: "replace",
             data: {
               replacementGif: "/images/story7/leaves.gif",
-              duration: 1500,
+              duration: 5000,
             },
           },
           {

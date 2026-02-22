@@ -13,6 +13,7 @@ export const StorySlide: React.FC = () => {
   const prevStoryIdRef = useRef<number | null>(null)
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Добавили videoReady, чтобы синхронизировать появление
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageDimensions, setImageDimensions] = useState({ width: 1920, height: 1080 })
   const [fadeIn, setFadeIn] = useState(false)
@@ -28,8 +29,11 @@ export const StorySlide: React.FC = () => {
     return /\.(mp4|webm)$/i.test(url)
   }
 
+  // --- ГЛАВНЫЙ ЭФФЕКТ ЗАГРУЗКИ ---
   useEffect(() => {
-    setFadeIn(false)
+    // 1. Сброс при смене слайда
+    setFadeIn(false) // Сразу скрываем контент
+    setImageLoaded(false)
     setIsLayerToggled(false)
     setSequenceIndex(-1)
     setIsSequenceActive(false)
@@ -42,67 +46,116 @@ export const StorySlide: React.FC = () => {
 
     if (!currentStory) return
 
-    const src = isVideo(currentStory.backgroundImage) ? currentStory.baseLayer : currentStory.backgroundImage
-
-    if (src) {
-      const img = new Image()
-      img.src = src
-
-      const updateImage = () => {
-        setImageDimensions({ width: img.width, height: img.height })
-        setImageLoaded(true)
-        requestAnimationFrame(() => setFadeIn(true))
-      }
-
-      if (img.complete) {
-        updateImage()
+    // Логика для КАРТИНКИ
+    if (!isVideo(currentStory.backgroundImage)) {
+      const src = currentStory.backgroundImage || currentStory.baseLayer
+      if (src) {
+        const img = new Image()
+        img.src = src
+        const handleImageLoad = () => {
+          setImageDimensions({ width: img.width, height: img.height })
+          setImageLoaded(true)
+          // Небольшая задержка, чтобы браузер успел отрисовать
+          requestAnimationFrame(() => setFadeIn(true))
+        }
+        if (img.complete) handleImageLoad()
+        else {
+          img.onload = handleImageLoad
+          img.onerror = handleImageLoad
+        }
       } else {
-        img.onload = updateImage
-        img.onerror = updateImage
+        setImageLoaded(true)
+        setFadeIn(true)
       }
-    } else {
+    }
+    // Логика для ВИДЕО (обрабатываем только размеры и флаг loaded)
+    else {
+      // Для видео мы сразу говорим "загружено", но fadeIn включим в другом эффекте,
+      // когда видео реально запустится
       setImageLoaded(true)
-      setFadeIn(true)
+
+      // Если есть baseLayer, берем размеры с него (обычно видео и слой совпадают)
+      if (currentStory.baseLayer) {
+        const img = new Image()
+        img.src = currentStory.baseLayer
+        img.onload = () => setImageDimensions({ width: img.width, height: img.height })
+      }
     }
   }, [currentStory?.id])
 
+  // --- ЭФФЕКТ ДЛЯ УПРАВЛЕНИЯ ВИДЕО ---
   useEffect(() => {
     const container = videoContainerRef.current
-
     const prevStoryId = prevStoryIdRef.current
-    const prevStory = prevStoryId !== null ? stories.find((s) => s.id === prevStoryId) : null
 
-    if (prevStory && isVideo(prevStory.backgroundImage)) {
-      const prevVideo = getVideoElement(prevStory.backgroundImage!)
-      if (prevVideo && prevVideo.parentNode) {
-        prevVideo.parentNode.removeChild(prevVideo)
-        prevVideo.pause()
-        prevVideo.playbackRate = 1
+    // Очистка предыдущего видео
+    if (prevStoryId !== null && prevStoryId !== currentStory?.id) {
+      const prevStory = stories.find((s) => s.id === prevStoryId)
+      if (prevStory && isVideo(prevStory.backgroundImage)) {
+        const prevVideo = getVideoElement(prevStory.backgroundImage!)
+        if (prevVideo) {
+          prevVideo.pause()
+          prevVideo.currentTime = 0 // Сброс на начало
+        }
       }
     }
-
     prevStoryIdRef.current = currentStory?.id ?? null
 
-    if (!container || !currentStory) return
+    if (!container || !currentStory || !isVideo(currentStory.backgroundImage)) return
 
-    if (isVideo(currentStory.backgroundImage)) {
-      const cachedVideo = getVideoElement(currentStory.backgroundImage!)
+    const videoUrl = currentStory.backgroundImage!
+    const cachedVideo = getVideoElement(videoUrl)
 
-      if (cachedVideo) {
-        cachedVideo.className = `${styles.background} ${fadeIn ? styles.fadeIn : styles.fadeOut}`
-        cachedVideo.style.height = currentStory.backgroundHeight || "100%"
-        cachedVideo.playbackRate = 1
+    if (cachedVideo) {
+      // Стилизация
+      cachedVideo.className = `${styles.background} ${fadeIn ? styles.fadeIn : styles.fadeOut}`
+      cachedVideo.style.height = currentStory.backgroundHeight || "100%"
+      cachedVideo.style.width = "100%"
+      cachedVideo.style.objectFit = "cover" // Важно, чтобы не дергалось
+      cachedVideo.playbackRate = 1
+      cachedVideo.muted = true // Гарантия автоплея
+      cachedVideo.loop = true
 
-        if (cachedVideo.parentNode !== container) {
-          container.innerHTML = ""
-          container.appendChild(cachedVideo)
+      // Вставляем в DOM (пока невидимым из-за fadeIn=false)
+      if (cachedVideo.parentNode !== container) {
+        container.innerHTML = ""
+        container.appendChild(cachedVideo)
+      }
+
+      // ФУНКЦИЯ БЕЗОПАСНОГО ЗАПУСКА
+      const playAndFadeIn = () => {
+        cachedVideo
+          .play()
+          .then(() => {
+            // ТОЛЬКО когда промис play() выполнен успешно (кадры пошли)
+            // мы включаем видимость
+            requestAnimationFrame(() => setFadeIn(true))
+          })
+          .catch((e) => {
+            console.warn("Video play error:", e)
+            // Если ошибка (например, политика автоплея), все равно показываем,
+            // чтобы не было черного экрана вечно
+            setFadeIn(true)
+          })
+      }
+
+      // Проверка готовности
+      if (cachedVideo.readyState >= 3) {
+        // HAVE_FUTURE_DATA - достаточно данных
+        playAndFadeIn()
+      } else {
+        // Если не готово, ждем событие
+        const onCanPlay = () => {
+          playAndFadeIn()
+          cachedVideo.removeEventListener("canplay", onCanPlay)
         }
-
-        cachedVideo.play().catch(() => {})
+        cachedVideo.addEventListener("canplay", onCanPlay)
+        cachedVideo.load() // Форсируем загрузку
       }
     }
-  }, [currentStory?.id, fadeIn, currentStory?.backgroundHeight, stories])
+  }, [currentStory?.id, currentStory?.backgroundImage, fadeIn]) // fadeIn здесь нужен, чтобы обновить классы, но логика запуска внутри управляет setFadeIn
 
+  // --- SEQUENCE LOGIC ---
   useEffect(() => {
     let timeoutId: NodeJS.Timeout
 
@@ -121,7 +174,6 @@ export const StorySlide: React.FC = () => {
         setIsSequenceActive(false)
       }
     }
-
     return () => clearTimeout(timeoutId)
   }, [sequenceIndex, isSequenceActive, direction, currentStory?.backgroundSequence, currentStory?.sequenceInterval, currentStory?.sequenceSound, isAudioPlaying])
 
@@ -130,8 +182,7 @@ export const StorySlide: React.FC = () => {
     const isObjectClick = !!target.closest('[data-layer="objects"]')
 
     if (!isObjectClick && currentStory.clickSound && isAudioPlaying) {
-      const audio = new Audio(currentStory.clickSound)
-      audio.play().catch(() => {})
+      new Audio(currentStory.clickSound).play().catch(() => {})
     }
 
     if (!isObjectClick && currentStory.videoSpeedOnClick && isVideo(currentStory.backgroundImage)) {
@@ -148,14 +199,12 @@ export const StorySlide: React.FC = () => {
       return
     }
 
-    if (!isObjectClick && currentStory.backgroundSequence && currentStory.backgroundSequence.length > 0) {
+    if (!isObjectClick && currentStory.backgroundSequence?.length) {
       const len = currentStory.backgroundSequence.length
       if (sequenceIndex === -1) {
         setSequenceIndex(0)
         setDirection(1)
-        if (currentStory.sequenceSound && isAudioPlaying) {
-          new Audio(currentStory.sequenceSound).play().catch(() => {})
-        }
+        if (currentStory.sequenceSound && isAudioPlaying) new Audio(currentStory.sequenceSound).play().catch(() => {})
       } else if (sequenceIndex === len - 1) {
         setDirection(-1)
       } else if (sequenceIndex === 0) {
@@ -170,9 +219,7 @@ export const StorySlide: React.FC = () => {
     const hasCustomAnimation = currentStory.objects.some((obj) => obj.customClass)
 
     if (currentStory.toggleBaseLayer) {
-      if (!isObjectClick) {
-        setIsLayerToggled((prev) => !prev)
-      }
+      if (!isObjectClick) setIsLayerToggled((prev) => !prev)
     } else if (hasCustomAnimation) {
       if (isLayerToggled) return
       setIsLayerToggled(true)
@@ -193,6 +240,7 @@ export const StorySlide: React.FC = () => {
     const heightStyle = currentStory.backgroundHeight || "100%"
 
     if (isVideo(currentStory.backgroundImage)) {
+      // Видео рендерится через ref, но класс fadeIn на самом видео элементе управляется в useEffect
       return <div ref={videoContainerRef} style={{ zIndex, position: "absolute", width: "100%", height: "100%", top: 0, left: 0 }} />
     }
 
@@ -218,6 +266,7 @@ export const StorySlide: React.FC = () => {
   return (
     <div className={styles.storySlide}>
       <div className={styles.imageContainer} style={containerStyle} onClick={handleContainerClick}>
+        {/* Загружаем картинки, они появляются вместе с флагом fadeIn */}
         {imageLoaded && (
           <img
             src={activeBaseLayer || (isVideo(currentStory.backgroundImage) ? "" : currentStory.backgroundImage)}
@@ -238,7 +287,8 @@ export const StorySlide: React.FC = () => {
           </div>
         )}
 
-        {imageLoaded ? renderMainBackground(mainBgZ) : <div className={styles.loader}>Loading assets...</div>}
+        {/* Фон рендерится только когда imageLoaded=true, но fadeIn сработает позже для видео */}
+        {imageLoaded ? renderMainBackground(mainBgZ) : <div className={styles.loader}>Loading...</div>}
 
         {imageLoaded &&
           currentStory.backgroundSequence?.map((src, index) => (
